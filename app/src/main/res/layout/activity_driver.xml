@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/driver_driverDrawerLayout"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    <FrameLayout
+        android:background="@drawable/login_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/driver_toolBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.Light"/>
+        <!--?attr/colorPrimary-->
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/driver_setTraffic"
+            app:backgroundTint="#87CEFF"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="230dp"
+            android:src="@drawable/icon_traffic"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/driver_start"
+            app:backgroundTint="#87CEFF"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="30dp"
+            android:src="@drawable/icon_home_route"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/driver_refreshPassenger"
+            app:backgroundTint="#87CEFF"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="100dp"
+            android:src="@drawable/refresh_passenger"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/driver_onRoadPassenger"
+            app:backgroundTint="#87CEFF"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="170dp"
+            android:src="@drawable/icon_onroadpassenger"/>
+        <com.baidu.mapapi.map.MapView
+            android:id="@+id/driver_mapView"
+            android:layout_width="fill_parent"
+            android:layout_height="530dp"
+            android:layout_alignParentRight="true"
+            android:clickable="true" />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="40dp">
+            <AutoCompleteTextView
+                android:id="@+id/driver_searchContent"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:completionThreshold="1"
+                android:maxLines="1"
+                android:hint="请输入目的地"/>
+            <Button
+                android:id="@+id/driver_search"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="确认"/>
+
+        </LinearLayout>
+        <TextView
+            android:layout_gravity="bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:id="@+id/driver_locationInfo"
+            android:text="您的位置:"
+            android:textSize="18dp"
+            android:textStyle="italic"
+            android:gravity="center_horizontal"/>
+
+    </FrameLayout>
+
+    <android.support.design.widget.NavigationView
+        android:id="@+id/driver_navView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@drawable/login_image"
+        app:menu="@menu/driver_nav_menu"
+        app:headerLayout="@layout/driver_nav_head"/>
+</android.support.v4.widget.DrawerLayout>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:background="@drawable/login_image">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp">
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:gravity="center"
+        android:paddingTop="10dp">
+        <EditText
+            android:id="@+id/register_userNumber"
+            android:layout_width="250dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/input_bg"
+            android:maxLines="1"
+            android:hint="手机号"
+            android:layout_gravity="center_horizontal"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:gravity="center"
+        android:paddingTop="10dp">
+        <EditText
+            android:id="@+id/register_passenger_passWord"
+            android:layout_width="250dp"
+            android:layout_height="match_parent"
+            android:inputType="numberPassword"
+            android:background="@drawable/input_bg"
+            android:maxLines="1"
+            android:hint="密  码"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:gravity="center"
+        android:paddingTop="10dp">
+
+        <EditText
+            android:id="@+id/register_passenger_again_passWord"
+            android:layout_width="250dp"
+            android:layout_height="match_parent"
+            android:inputType="numberPassword"
+            android:background="@drawable/input_bg"
+            android:maxLines="1"
+            android:hint="再次输入密码"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:paddingTop="10dp">
+
+        <TextView
+            android:id="@+id/register_passenger_getCode"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="50dp"
+            android:gravity="center"
+            android:clickable="true"
+            android:text="获取验证码"
+            android:background="@drawable/input_bg"/>
+        <EditText
+            android:id="@+id/register_passenger_verificationCode"
+            android:layout_width="145dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/input_bg"
+            android:layout_marginLeft="10dp"
+            android:maxLines="1" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <CheckBox
+            android:id="@+id/register_passenger_agreecheckbox"
+            android:layout_width="112dp"
+            android:layout_height="match_parent"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:text="已阅读并同意" />
+
+        <TextView
+            android:id="@+id/register_passengerAgree"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:text="用户协议及隐私政策"
+            android:gravity="center_vertical" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:gravity="center"
+        android:paddingTop="10dp">
+        <Button
+            android:id="@+id/register_passenger"
+            android:layout_width="250dp"
+            android:layout_height="45dp"
+            android:layout_gravity="center_horizontal"
+            android:text="注 册"/>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,189 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mainFrame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/backImg"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="false"
+        android:scaleX="3"
+        android:scaleY="3"/>
+
+    <LinearLayout xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/mainLinear"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:weightSum="5"
+        tools:context="com.example.carpoolgo.Login"
+        >
+
+        <!-- TODO: Update blank fragment layout -->
+
+        <RelativeLayout
+            android:id="@+id/relative"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.75"
+            android:background="#C3D3D3D3"
+            android:gravity="center">
+
+            <EditText
+                android:id="@+id/registerTel"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="20dp"
+                android:hint="电话号码"
+                android:inputType="textCapSentences|textEmailAddress"
+                android:padding="20dp"
+                android:visibility="gone" />
+
+
+            <EditText
+                android:id="@+id/registerPassWord"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/registerTel"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="20dp"
+                android:hint="密码"
+                android:inputType="textCapSentences"
+                android:padding="20dp"
+                android:visibility="gone" />
+
+
+            <EditText
+                android:id="@+id/registerAgainPassWord"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/registerPassWord"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="20dp"
+                android:hint="确认密码"
+                android:inputType="textCapSentences"
+                android:padding="20dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/register"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/registerAgainPassWord"
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:rotation="90"
+                android:text="注册"
+                android:textColor="#000000"
+                android:textSize="14sp" />
+
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/relative2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="4.25"
+            android:background="#C387CEFA"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_centerHorizontal="true"
+                android:padding="20dp"
+                android:text="校园拼车GO"
+                android:textSize="23sp"
+                android:textStyle="italic"/>
+
+            <EditText
+                android:id="@+id/login_userNum"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="20dp"
+                android:hint="账号"
+                android:layout_below="@+id/title"
+                android:inputType="textCapSentences|textEmailAddress"
+                android:padding="20dp" />
+
+
+            <EditText
+                android:id="@+id/login_passWord"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/login_userNum"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="20dp"
+                android:hint="密码"
+                android:inputType="textCapSentences"
+                android:padding="20dp" />
+
+            <RadioGroup
+                android:id="@+id/userType"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/login_passWord"
+                android:layout_centerInParent="true"
+                android:orientation="horizontal"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="20dp"
+                android:inputType="textCapSentences"
+                android:padding="20dp">
+                <RadioButton
+                    android:id="@+id/passenger"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:checked="true"
+                    android:text="乘客" />
+
+                <RadioButton
+                    android:id="@+id/driver"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:checked="false"
+                    android:layout_marginLeft="30dp"
+                    android:text="司机" />
+            </RadioGroup>
+
+
+
+            <TextView
+                android:id="@+id/login_login"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/userType"
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:scaleX="2"
+                android:scaleY="2"
+                android:text="登录 "
+                android:textColor="#000000"
+                android:textSize="14sp" />
+
+
+        </RelativeLayout>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_marginStart="30dp"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+
+    </LinearLayout>
+
+
+</FrameLayout>

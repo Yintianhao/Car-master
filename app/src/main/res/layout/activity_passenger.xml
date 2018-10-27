@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/passenger_passenger_drawerLayout"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    <FrameLayout
+        android:background="@drawable/login_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/passenger_passenger_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.Light"/>
+        <!--?attr/colorPrimary-->
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/passenger_passenger_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:backgroundTint="#87CEFF"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="27dp"
+            android:src="@drawable/ic_search"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/passenger_passenger_setTraffic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:backgroundTint="#87CEFF"
+            android:layout_gravity="bottom|end"
+            android:layout_marginRight="27dp"
+            android:layout_marginBottom="90dp"
+            android:src="@drawable/icon_trafficshow"/>
+
+        <com.baidu.mapapi.map.MapView
+            android:id="@+id/passenger_passenger_mapView"
+            android:layout_width="fill_parent"
+            android:layout_height="530dp"
+            android:layout_alignParentRight="true"
+            android:clickable="true" />
+
+        <TextView
+            android:layout_gravity="bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:id="@+id/passenger_passenger_locationInfo"
+            android:text="您的位置:"
+            android:textSize="18dp"
+            android:textStyle="italic"
+            android:gravity="center_horizontal"/>
+
+    </FrameLayout>
+
+    <android.support.design.widget.NavigationView
+        android:id="@+id/passenger_passenger_navView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@drawable/login_image"
+        app:menu="@menu/passenger_nav_menu"
+        app:headerLayout="@layout/passenger_nav_head"/>
+</android.support.v4.widget.DrawerLayout>
