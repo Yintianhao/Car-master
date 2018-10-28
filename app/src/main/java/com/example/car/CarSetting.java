@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -32,7 +33,7 @@ public class CarSetting extends AppCompatActivity implements View.OnClickListene
     EditText carColor;//车辆颜色
     EditText carCapacity;//容量
     EditText carModel;
-    Button save;
+    TextView save;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,7 +50,7 @@ public class CarSetting extends AppCompatActivity implements View.OnClickListene
         carBrand = (EditText)findViewById(R.id.carBrand);
         carCapacity = (EditText)findViewById(R.id.carCapacity);
         carColor = (EditText)findViewById(R.id.carColor);
-        save = (Button)findViewById(R.id.carSettingSave);
+        save = (TextView)findViewById(R.id.carSettingSave);
         carModel = (EditText)findViewById(R.id.carModel);
     }
     @Override
@@ -62,7 +63,6 @@ public class CarSetting extends AppCompatActivity implements View.OnClickListene
                 break;
         }
     }
-
     public void showCarInfo(final String driverId){
         //请求地址
         String url = "http://47.106.72.170:8080/MyCarSharing/selectcarinfo.action";

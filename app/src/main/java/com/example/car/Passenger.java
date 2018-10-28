@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationListener;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -52,7 +51,6 @@ import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
-import com.baidu.mapapi.map.InfoWindow;
 import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
@@ -101,11 +99,7 @@ import java.util.Map;
 import Tool.Const;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class Passenger extends AppCompatActivity implements
-        LocationListener,
-        OnGetGeoCoderResultListener
-,BaiduMap.OnMarkerClickListener
-,BaiduMap.OnMapClickListener{
+public class Passenger extends AppCompatActivity{
 
     MapView mapView;//地图视图
     BaiduMap baiduMap;//地图实例
@@ -119,7 +113,7 @@ public class Passenger extends AppCompatActivity implements
     TextView latestLocationInfo;
     MarkerOptions myLocationOption;
     RoutePlanSearch routePlanSearch;
-    FloatingActionButton go;
+    FloatingActionButton inputInformation;
     String startPlace;
     String endPlace;
     String startTime;
@@ -217,151 +211,68 @@ public class Passenger extends AppCompatActivity implements
     }
     public void initActivityEvents(){
         /*
-         * 相关控件初始化
-         * */
+        * 交通状况和路上乘客集合
+        * */
         isTraffic = new ArrayList<>();
         isTraffic.add(false);
         isTraffic.add(true);
         onRoadPassengers = new ArrayList<>();
+        /*
+        * instance
+        * */
         latestLocationInfo = (TextView) findViewById(R.id.passenger_passenger_locationInfo);
         routePlanSearch =RoutePlanSearch.newInstance();//路线规划对象实例化
-        go = (FloatingActionButton)findViewById(R.id.passenger_passenger_start);
+        inputInformation = (FloatingActionButton)findViewById(R.id.passenger_passenger_start);
         setTraffic = (FloatingActionButton)findViewById(R.id.passenger_passenger_setTraffic);
         drawerLayout = (DrawerLayout)findViewById(R.id.passenger_passenger_drawerLayout);
+        /*
+        * sharedPreferences实例化
+        * 初始化头像控件和名称
+        * */
         sharedPreferences = getSharedPreferences("Setting",MODE_MULTI_PROCESS);
         editor = sharedPreferences.edit();
         image_path = sharedPreferences.getString("passenger_image_path"+getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("user",""),"");
         Log.d("侧滑栏图片路径:",image_path+"....");
         navigationView = (NavigationView)findViewById(R.id.passenger_passenger_navView);
+        navigationView.setCheckedItem(R.id.nav_setting);
         leftHead =  (CircleImageView) navigationView.getHeaderView(0).findViewById(R.id.Left_head);//获得左边头像的View
-        Const.leftHead = leftHead;//以便于之后设置头像同步更新
-        if(!image_path.equals(""))//取出头像的图片的路径
+        Const.leftHead = leftHead;
+        //取出头像路径
+        if(!image_path.equals(""))
             leftHead.setImageBitmap(BitmapFactory.decodeFile(image_path));
         //从SP里面取出用户昵称然后显示
         nickName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.nick_text);
-        nickName.setText(sharedPreferences.getString("NAME"+getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("user",""),""));
+        String name_nick = sharedPreferences.getString("NAME"+getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("user",""),"");
+        if(!name_nick.equals("")||name_nick.equals("null"))
+            nickName.setText(name_nick);
+        //actionBar设置
         ActionBar actionBar = getSupportActionBar();
+        if(actionBar!=null){
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeAsUpIndicator(R.drawable.tool_bar);
+        }
         mapView = (MapView) findViewById(R.id.passenger_passenger_mapView);
         mapView.showZoomControls(false);
         baiduMap = mapView.getMap();//得到地图实例
         baiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);//设置为普通地图
         baiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(15));//设置缩放比例
-        baiduMap.setOnMarkerClickListener(this);
+        baiduMap.setOnMarkerClickListener(new MarkerClickerListener());
         baiduMap.setTrafficEnabled(true);
-        baiduMap.setOnMapClickListener(this);
+        baiduMap.setOnMapClickListener(new MapClickerListener());
         UiSettings settings = baiduMap.getUiSettings();
         settings.setOverlookingGesturesEnabled(false);
         settings.setRotateGesturesEnabled(false);
-        if(actionBar!=null){
-            //actionBart的一些设置
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(R.drawable.tool_bar);
-        }
-        navigationView.setCheckedItem(R.id.nav_setting);
-
     }
     public void addListener(){
         //悬浮按钮监听
-        go.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //startGo();
-                initDialogEvents();
-                setOrder();
-                //addPeopleToMap(Const.userName);
-            }
-        });
+        inputInformation.setOnClickListener(new ViewClickListener());
+        setTraffic.setOnClickListener(new ViewClickListener());
         //侧栏
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                //判断点击了哪个item
-                switch (item.getItemId()){
-                    //设置
-                    case R.id.nav_setting:
-                        Intent to_setting = new Intent(Passenger.this,Setting.class);
-                        to_setting.putExtra("LEFT_HEAD_SCULPTURE",R.id.Left_head);
-                        to_setting.putExtra("DriverOrPassenger","Passenger");
-                        startActivity(to_setting);
-                        break;
-                    case R.id.account_setting:
-                        Intent to_AccountSetting = new Intent(Passenger.this,AccountSetting.class);
-                        startActivity(to_AccountSetting);
-                        break;
-                    //关于
-                    case R.id.nav_about:
-                        Intent to_about = new Intent(Passenger.this,About.class);
-                        startActivity(to_about);
-                        break;
-                    //注销
-                    case R.id.nav_exit:
-                        //点击了注销登录,将自动登录的选项还原
-                        SharedPreferences sharedPreferences = getSharedPreferences("Setting",MODE_MULTI_PROCESS);
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putBoolean("auto_login",false);
-                        editor.commit();
-                        Intent to_login = new Intent(Passenger.this,Login.class);
-                        startActivity(to_login);
-                        finish();
-                        break;
-                }
-                return true;
-            }
-        });
-
+        navigationView.setNavigationItemSelectedListener(new NavigationViewListener());
         //路线规划
-        routePlanSearch.setOnGetRoutePlanResultListener(new OnGetRoutePlanResultListener() {
-            @Override
-            public void onGetWalkingRouteResult(WalkingRouteResult walkingRouteResult) {
-
-            }
-
-            @Override
-            public void onGetTransitRouteResult(TransitRouteResult transitRouteResult) {
-
-            }
-
-            @Override
-            public void onGetMassTransitRouteResult(MassTransitRouteResult massTransitRouteResult) {
-
-            }
-
-            @Override
-            public void onGetDrivingRouteResult(DrivingRouteResult drivingRouteResult) {
-                //驾车路线规划
-                if(drivingRouteResult.error== SearchResult.ERRORNO.NO_ERROR){
-                    for(int i = 0;i < drivingRouteResult.getRouteLines().size();i++){
-                        drawRouteLine(drivingRouteResult,i);
-                    }
-
-                }
-            }
-
-            @Override
-            public void onGetIndoorRouteResult(IndoorRouteResult indoorRouteResult) {
-
-            }
-
-            @Override
-            public void onGetBikingRouteResult(BikingRouteResult bikingRouteResult) {
-
-            }
-        });
-
+        routePlanSearch.setOnGetRoutePlanResultListener(new RoutePlanResultListener());
         //地图监听 长按清空坐标
-        baiduMap.setOnMapLongClickListener(new BaiduMap.OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(LatLng latLng) {
-                baiduMap.clear();
-            }
-        });
-        setTraffic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                clickNum++;
-                baiduMap.setTrafficEnabled(isTraffic.get(clickNum%2));
-            }
-        });
+        baiduMap.setOnMapLongClickListener(new MapLongClickerListener());
 
     }
     public void setOrder(){
@@ -668,174 +579,6 @@ public class Passenger extends AppCompatActivity implements
         }
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        //实时对位置进行监听并更新位置
-        GeoCoder geoCoder = GeoCoder.newInstance();
-        geoCoder.setOnGetGeoCodeResultListener(this);
-        LatLng center = new LatLng(location.getLatitude(),location.getLongitude());
-        geoCoder.reverseGeoCode(new ReverseGeoCodeOption().location(center));
-        MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(center);
-        baiduMap.animateMapStatus(update);
-        MarkerOptions options = new MarkerOptions().position(center).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_mylocation));
-        myLocationOption = options;
-        baiduMap.clear();
-        baiduMap.addOverlay(options);
-    }
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
-    }
-    @Override
-    public void onProviderEnabled(String s) {
-    }
-    @Override
-    public void onProviderDisabled(String s) {
-    }
-    @Override
-    public void onGetGeoCodeResult(GeoCodeResult geoCodeResult) {
-
-    }
-    @Override
-    public void onGetReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
-        if (reverseGeoCodeResult==null || reverseGeoCodeResult.error != SearchResult.ERRORNO.NO_ERROR) {
-            //没有检索到结果
-            Toast.makeText(Passenger.this,"请适当移动你的位置来获得你的位置信息",Toast.LENGTH_SHORT).show();
-        }else {
-            latestLocationInfo.setText("您的位置:"+reverseGeoCodeResult.getAddressDetail().city+reverseGeoCodeResult.getAddressDetail().district+reverseGeoCodeResult.getAddressDetail().street);
-        }
-    }
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
-        View view = inflater.inflate(R.layout.on_road_pandd, null);
-        view.setBackgroundResource(R.drawable.icon_info_background);
-        TextView userName;
-        TextView userTel;
-        TextView startToEnd;
-        TextView startTime;
-        TextView endTime;
-        TextView moneyBefore;
-        TextView moneyAfter;
-        TextView carNum;
-        Button toChat;
-        Button cancel;
-        Button toCall;
-        for(int i = 0;i < onRoadPassengers.size();i++){
-            if(marker.getExtraInfo().getInt("Number")==i){
-                try{
-                    if(onRoadPassengers.get(i).getString("supplycar").equals("1")){
-                        view = inflater.inflate(R.layout.on_road_driver,null);
-                        view.setBackgroundResource(R.drawable.icon_info_background);
-                        userName = (TextView)view.findViewById(R.id.onroad_passenger_name);
-                        userTel  = (TextView)view.findViewById(R.id.onroad_passenger_tel);
-                        startToEnd = (TextView)view.findViewById(R.id.onroad_passenger_startToEnd);
-                        startTime = (TextView)view.findViewById(R.id.onroad_passenger_starttime);
-                        endTime = (TextView)view.findViewById(R.id.onroad_passenger_endtime);
-                        moneyBefore = (TextView)view.findViewById(R.id.onroad_passenger_moneybefore);
-                        moneyAfter = (TextView)view.findViewById(R.id.onroad_passenger_moneyafter);
-                        carNum = (TextView)view.findViewById(R.id.onroad_passenger_carNum);
-                        toChat = (Button)view.findViewById(R.id.onroad_passenger_chat);
-                        cancel = (Button)view.findViewById(R.id.onroad_passenger_cancel);
-                        toCall = (Button)view.findViewById(R.id.onroad_passenger_call);
-                        toChat.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                startActivity(new Intent(Passenger.this,Chatting.class));
-                            }
-                        });
-
-                        userName.setText(onRoadPassengers.get(i).getString("name"));
-                        userTel.setText(onRoadPassengers.get(i).getString("userid"));
-                        startToEnd.setText(onRoadPassengers.get(i).getString("startplace")+"---->"+onRoadPassengers.get(i).getString("destination"));
-                        startTime.setText(onRoadPassengers.get(i).getString("startdate"));
-                        endTime.setText(onRoadPassengers.get(i).getString("enddate"));
-                        moneyBefore.setText(onRoadPassengers.get(i).getString("spendMoney")+"元");
-                        moneyAfter.setText(onRoadPassengers.get(i).getString("sharingMoney")+"元");
-                        carNum.setText(onRoadPassengers.get(i).getString("carnum"));
-                        final String telephoneNumber = userTel.getText().toString();
-                        toCall.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+telephoneNumber)));
-                            }
-                        });
-                        final AlertDialog dialog = new AlertDialog.Builder(this)
-                                .setTitle("乘客信息")
-                                .setView(view)
-                                .create();
-                        dialog.setTitle("用户乘客");
-                        dialog.setCanceledOnTouchOutside(false);
-                        dialog.show();
-                        cancel.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                dialog.dismiss();
-                            }
-                        });
-                    }else {
-                        view = inflater.inflate(R.layout.on_road_pandd,null);
-                        view.setBackgroundResource(R.drawable.icon_info_background);
-                        userName = (TextView)view.findViewById(R.id.onroad_passenger_name);
-                        userTel  = (TextView)view.findViewById(R.id.onroad_passenger_tel);
-                        startToEnd = (TextView)view.findViewById(R.id.onroad_passenger_startToEnd);
-                        startTime = (TextView)view.findViewById(R.id.onroad_passenger_starttime);
-                        endTime = (TextView)view.findViewById(R.id.onroad_passenger_endtime);
-                        moneyBefore = (TextView)view.findViewById(R.id.onroad_passenger_moneybefore);
-                        moneyAfter = (TextView)view.findViewById(R.id.onroad_passenger_moneyafter);
-                        toChat = (Button)view.findViewById(R.id.onroad_passenger_chat);
-                        cancel = (Button)view.findViewById(R.id.onroad_passenger_cancel);
-                        toCall = (Button)view.findViewById(R.id.onroad_passenger_call);
-                        toChat.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                startActivity(new Intent(Passenger.this,Chatting.class));
-                            }
-                        });
-                        userName.setText(onRoadPassengers.get(i).getString("name"));
-                        userTel.setText(onRoadPassengers.get(i).getString("userid"));
-                        startToEnd.setText(onRoadPassengers.get(i).getString("startplace")+"---->"+onRoadPassengers.get(i).getString("destination"));
-                        startTime.setText(onRoadPassengers.get(i).getString("startdate"));
-                        endTime.setText(onRoadPassengers.get(i).getString("enddate"));
-                        moneyBefore.setText(onRoadPassengers.get(i).getString("spendMoney")+"元");
-                        moneyAfter.setText(onRoadPassengers.get(i).getString("sharingMoney")+"元");
-                        final String telephoneNumber = userTel.getText().toString();
-                        toCall.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                startActivity(new Intent(Intent.ACTION_DIAL,Uri.parse("tel:"+telephoneNumber)));
-                            }
-                        });
-                        final AlertDialog dialog = new AlertDialog.Builder(this)
-                                .setTitle("用户信息")
-                                .setView(view)
-                                .create();
-                        dialog.setTitle("附近乘客");
-                        dialog.setCanceledOnTouchOutside(false);
-                        dialog.show();
-                        cancel.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                dialog.dismiss();
-                            }
-                        });
-                    }
-
-                }catch (Exception e){
-
-                }
-            }
-        }
-        return true;
-    }
-    @Override
-    public void onMapClick(LatLng latLng) {
-        baiduMap.hideInfoWindow();
-    }
-    @Override
-    public boolean onMapPoiClick(MapPoi mapPoi) {
-        Toast.makeText(Passenger.this,mapPoi.getName(),Toast.LENGTH_SHORT).show();
-        return false;
-    }
     static class MyStringRequest extends StringRequest {
 
         public MyStringRequest(int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
@@ -858,7 +601,7 @@ public class Passenger extends AppCompatActivity implements
             return Response.success(str, HttpHeaderParser.parseCacheHeaders(response));
         }
     }
-    class MyTextWatcher implements TextWatcher,OnGetPoiSearchResultListener,AdapterView.OnItemClickListener{
+    private class MyTextWatcher implements TextWatcher,OnGetPoiSearchResultListener,AdapterView.OnItemClickListener{
 
         List<String> searchResult;
         AutoCompleteTextView textView;
@@ -937,7 +680,7 @@ public class Passenger extends AppCompatActivity implements
             }
         }
     }
-    class MyLocationListener implements BDLocationListener {
+    private class MyLocationListener implements BDLocationListener {
         /*
         * 如要实现通过GPS定位起点 需要将mapView变为static
         * */
@@ -962,4 +705,280 @@ public class Passenger extends AppCompatActivity implements
             }
         }
     }
+    private class ViewClickListener implements View.OnClickListener{
+
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()){
+                case R.id.passenger_passenger_start:
+                    initDialogEvents();
+                    setOrder();
+                    break;
+                case R.id.passenger_passenger_setTraffic:
+                    clickNum++;
+                    baiduMap.setTrafficEnabled(isTraffic.get(clickNum%2));
+                    break;
+            }
+        }
+    }
+    private class RoutePlanResultListener implements OnGetRoutePlanResultListener {
+        @Override
+        public void onGetWalkingRouteResult(WalkingRouteResult walkingRouteResult) {
+
+        }
+
+        @Override
+        public void onGetTransitRouteResult(TransitRouteResult transitRouteResult) {
+
+        }
+
+        @Override
+        public void onGetMassTransitRouteResult(MassTransitRouteResult massTransitRouteResult) {
+
+        }
+
+        @Override
+        public void onGetDrivingRouteResult(DrivingRouteResult drivingRouteResult) {
+            //驾车路线规划
+            if(drivingRouteResult.error== SearchResult.ERRORNO.NO_ERROR){
+                for(int i = 0;i < drivingRouteResult.getRouteLines().size();i++){
+                    drawRouteLine(drivingRouteResult,i);
+                }
+
+            }
+        }
+
+        @Override
+        public void onGetIndoorRouteResult(IndoorRouteResult indoorRouteResult) {
+
+        }
+
+        @Override
+        public void onGetBikingRouteResult(BikingRouteResult bikingRouteResult) {
+
+        }
+    }
+    private class GeoCoderResultListener implements OnGetGeoCoderResultListener{
+
+        @Override
+        public void onGetGeoCodeResult(GeoCodeResult geoCodeResult) {
+
+        }
+        @Override
+        public void onGetReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
+            if (reverseGeoCodeResult==null || reverseGeoCodeResult.error != SearchResult.ERRORNO.NO_ERROR) {
+                //没有检索到结果
+                Toast.makeText(Passenger.this,"请适当移动你的位置来获得你的位置信息",Toast.LENGTH_SHORT).show();
+            }else {
+                latestLocationInfo.setText("您的位置:"+reverseGeoCodeResult.getAddressDetail().city+reverseGeoCodeResult.getAddressDetail().district+reverseGeoCodeResult.getAddressDetail().street);
+            }
+        }
+    }
+    private class LocationListener implements android.location.LocationListener{
+
+        @Override
+        public void onLocationChanged(Location location) {
+            //实时对位置进行监听并更新位置
+            GeoCoder geoCoder = GeoCoder.newInstance();
+            geoCoder.setOnGetGeoCodeResultListener(new GeoCoderResultListener());
+            LatLng center = new LatLng(location.getLatitude(),location.getLongitude());
+            geoCoder.reverseGeoCode(new ReverseGeoCodeOption().location(center));
+            MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(center);
+            baiduMap.animateMapStatus(update);
+            MarkerOptions options = new MarkerOptions().position(center).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_mylocation));
+            myLocationOption = options;
+            baiduMap.clear();
+            baiduMap.addOverlay(options);
+        }
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+        }
+        @Override
+        public void onProviderEnabled(String s) {
+        }
+        @Override
+        public void onProviderDisabled(String s) {
+        }
+    }
+    private class MarkerClickerListener implements BaiduMap.OnMarkerClickListener{
+
+        @Override
+        public boolean onMarkerClick(Marker marker) {
+            LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+            View view = inflater.inflate(R.layout.on_road_pandd, null);
+            view.setBackgroundResource(R.drawable.icon_info_background);
+            TextView userName;
+            TextView userTel;
+            TextView startToEnd;
+            TextView startTime;
+            TextView endTime;
+            TextView moneyBefore;
+            TextView moneyAfter;
+            TextView carNum;
+            Button toChat;
+            Button cancel;
+            Button toCall;
+            for(int i = 0;i < onRoadPassengers.size();i++){
+                if(marker.getExtraInfo().getInt("Number")==i){
+                    try{
+                        if(onRoadPassengers.get(i).getString("supplycar").equals("1")){
+                            view = inflater.inflate(R.layout.on_road_driver,null);
+                            view.setBackgroundResource(R.drawable.icon_info_background);
+                            userName = (TextView)view.findViewById(R.id.onroad_passenger_name);
+                            userTel  = (TextView)view.findViewById(R.id.onroad_passenger_tel);
+                            startToEnd = (TextView)view.findViewById(R.id.onroad_passenger_startToEnd);
+                            startTime = (TextView)view.findViewById(R.id.onroad_passenger_starttime);
+                            endTime = (TextView)view.findViewById(R.id.onroad_passenger_endtime);
+                            moneyBefore = (TextView)view.findViewById(R.id.onroad_passenger_moneybefore);
+                            moneyAfter = (TextView)view.findViewById(R.id.onroad_passenger_moneyafter);
+                            carNum = (TextView)view.findViewById(R.id.onroad_passenger_carNum);
+                            toChat = (Button)view.findViewById(R.id.onroad_passenger_chat);
+                            cancel = (Button)view.findViewById(R.id.onroad_passenger_cancel);
+                            toCall = (Button)view.findViewById(R.id.onroad_passenger_call);
+                            toChat.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    startActivity(new Intent(Passenger.this,Chatting.class));
+                                }
+                            });
+
+                            userName.setText(onRoadPassengers.get(i).getString("name"));
+                            userTel.setText(onRoadPassengers.get(i).getString("userid"));
+                            startToEnd.setText(onRoadPassengers.get(i).getString("startplace")+"---->"+onRoadPassengers.get(i).getString("destination"));
+                            startTime.setText(onRoadPassengers.get(i).getString("startdate"));
+                            endTime.setText(onRoadPassengers.get(i).getString("enddate"));
+                            moneyBefore.setText(onRoadPassengers.get(i).getString("spendMoney")+"元");
+                            moneyAfter.setText(onRoadPassengers.get(i).getString("sharingMoney")+"元");
+                            carNum.setText(onRoadPassengers.get(i).getString("carnum"));
+                            final String telephoneNumber = userTel.getText().toString();
+                            toCall.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+telephoneNumber)));
+                                }
+                            });
+                            final AlertDialog dialog = new AlertDialog.Builder(getApplicationContext())
+                                    .setTitle("乘客信息")
+                                    .setView(view)
+                                    .create();
+                            dialog.setTitle("用户乘客");
+                            dialog.setCanceledOnTouchOutside(false);
+                            dialog.show();
+                            cancel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    dialog.dismiss();
+                                }
+                            });
+                        }else {
+                            view = inflater.inflate(R.layout.on_road_pandd,null);
+                            view.setBackgroundResource(R.drawable.icon_info_background);
+                            userName = (TextView)view.findViewById(R.id.onroad_passenger_name);
+                            userTel  = (TextView)view.findViewById(R.id.onroad_passenger_tel);
+                            startToEnd = (TextView)view.findViewById(R.id.onroad_passenger_startToEnd);
+                            startTime = (TextView)view.findViewById(R.id.onroad_passenger_starttime);
+                            endTime = (TextView)view.findViewById(R.id.onroad_passenger_endtime);
+                            moneyBefore = (TextView)view.findViewById(R.id.onroad_passenger_moneybefore);
+                            moneyAfter = (TextView)view.findViewById(R.id.onroad_passenger_moneyafter);
+                            toChat = (Button)view.findViewById(R.id.onroad_passenger_chat);
+                            cancel = (Button)view.findViewById(R.id.onroad_passenger_cancel);
+                            toCall = (Button)view.findViewById(R.id.onroad_passenger_call);
+                            toChat.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    startActivity(new Intent(Passenger.this,Chatting.class));
+                                }
+                            });
+                            userName.setText(onRoadPassengers.get(i).getString("name"));
+                            userTel.setText(onRoadPassengers.get(i).getString("userid"));
+                            startToEnd.setText(onRoadPassengers.get(i).getString("startplace")+"---->"+onRoadPassengers.get(i).getString("destination"));
+                            startTime.setText(onRoadPassengers.get(i).getString("startdate"));
+                            endTime.setText(onRoadPassengers.get(i).getString("enddate"));
+                            moneyBefore.setText(onRoadPassengers.get(i).getString("spendMoney")+"元");
+                            moneyAfter.setText(onRoadPassengers.get(i).getString("sharingMoney")+"元");
+                            final String telephoneNumber = userTel.getText().toString();
+                            toCall.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    startActivity(new Intent(Intent.ACTION_DIAL,Uri.parse("tel:"+telephoneNumber)));
+                                }
+                            });
+                            final AlertDialog dialog = new AlertDialog.Builder(getApplicationContext())
+                                    .setTitle("用户信息")
+                                    .setView(view)
+                                    .create();
+                            dialog.setTitle("附近乘客");
+                            dialog.setCanceledOnTouchOutside(false);
+                            dialog.show();
+                            cancel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    dialog.dismiss();
+                                }
+                            });
+                        }
+
+                    }catch (Exception e){
+
+                    }
+                }
+            }
+            return true;
+        }
+    }
+    private class MapClickerListener implements BaiduMap.OnMapClickListener{
+
+        @Override
+        public void onMapClick(LatLng latLng) {
+            baiduMap.hideInfoWindow();
+        }
+        @Override
+        public boolean onMapPoiClick(MapPoi mapPoi) {
+            Toast.makeText(Passenger.this,mapPoi.getName(),Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    }
+    private class MapLongClickerListener implements BaiduMap.OnMapLongClickListener {
+        @Override
+        public void onMapLongClick(LatLng latLng) {
+            baiduMap.clear();
+        }
+    }
+    private class NavigationViewListener implements NavigationView.OnNavigationItemSelectedListener {
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            //判断点击了哪个item
+            switch (item.getItemId()){
+                //设置
+                case R.id.nav_setting:
+                    Intent to_setting = new Intent(Passenger.this,Setting.class);
+                    to_setting.putExtra("LEFT_HEAD_SCULPTURE",R.id.Left_head);
+                    to_setting.putExtra("DriverOrPassenger","Passenger");
+                    startActivity(to_setting);
+                    break;
+                case R.id.account_setting:
+                    Intent to_AccountSetting = new Intent(Passenger.this,AccountSetting.class);
+                    startActivity(to_AccountSetting);
+                    break;
+                //关于
+                case R.id.nav_about:
+                    Intent to_about = new Intent(Passenger.this,About.class);
+                    startActivity(to_about);
+                    break;
+                //注销
+                case R.id.nav_exit:
+                    //点击了注销登录,将自动登录的选项还原
+                    SharedPreferences sharedPreferences = getSharedPreferences("Setting",MODE_MULTI_PROCESS);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean("auto_login",false);
+                    editor.commit();
+                    Intent to_login = new Intent(Passenger.this,Login.class);
+                    startActivity(to_login);
+                    finish();
+                    break;
+            }
+            return true;
+        }
+    }
+
 }

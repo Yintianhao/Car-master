@@ -38,7 +38,7 @@ public class AccountSetting extends AppCompatActivity implements ViewGroup.OnCli
     EditText againPassword;
     TextView getCode;
     EditText verification;
-    Button save;
+    TextView save;
     MyHandler myHandler;
     EventHandler eventHandler;
     String phoneNum;
@@ -59,7 +59,7 @@ public class AccountSetting extends AppCompatActivity implements ViewGroup.OnCli
         againPassword = (EditText)findViewById(R.id.Accountsetting_againpwd);
         getCode = (TextView)findViewById(R.id.Accountsetting_getCode);
         verification = (EditText) findViewById(R.id.Accountsetting_verificationCode);
-        save = (Button)findViewById(R.id.Accountsetting_save);
+        save = (TextView)findViewById(R.id.Accountsetting_save);
         phoneNum = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("user","");
         passWord = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("passWord","");
         rightVerification = false;

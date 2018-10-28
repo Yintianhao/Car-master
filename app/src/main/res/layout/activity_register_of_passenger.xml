@@ -3,7 +3,7 @@
     android:orientation="vertical"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:background="@drawable/login_image">
+    android:background="#C387CEFA">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="120dp">

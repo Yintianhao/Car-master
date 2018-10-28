@@ -1,5 +1,6 @@
 package com.example.car;
 
+import android.app.Notification;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -65,7 +67,7 @@ public class Setting extends AppCompatActivity implements TakePhoto.TakeResultLi
     EditText userName;
     EditText userSex;
     EditText userAge;
-    Button saveInfo;
+    TextView saveInfo;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getTakePhoto().onCreate(savedInstanceState);
@@ -96,7 +98,7 @@ public class Setting extends AppCompatActivity implements TakePhoto.TakeResultLi
         userName = (EditText)findViewById(R.id.user_name);
         userAge = (EditText)findViewById(R.id.user_age);
         userSex = (EditText)findViewById(R.id.user_sex);
-        saveInfo = (Button)findViewById(R.id.setting_save);
+        saveInfo = (TextView) findViewById(R.id.setting_save);
 
     }
 

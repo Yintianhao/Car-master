@@ -105,8 +105,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import Tool.Const;
 import Tool.GPSConvert;
@@ -115,16 +113,7 @@ import Tool.MyPoi;
 import Tool.NearbyPassengerAdapter;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class Driver extends AppCompatActivity implements View.OnClickListener
-,NavigationView.OnNavigationItemSelectedListener
-,OnGetPoiSearchResultListener
-,OnGetGeoCoderResultListener
-,OnGetRoutePlanResultListener
-,BaiduMap.OnMapLongClickListener
-,BaiduMap.OnMapClickListener
-,TextWatcher
-,AdapterView.OnItemClickListener
-,BaiduMap.OnMarkerClickListener {
+public class Driver extends AppCompatActivity {
     MapView mapView;//地图视图
     BaiduMap baiduMap;//地图实例
     DrawerLayout drawerLayout;//DrawerLayout布局
@@ -212,7 +201,7 @@ public class Driver extends AppCompatActivity implements View.OnClickListener
         baiduMap = mapView.getMap();//得到地图实例
         baiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);//设置为普通地图
         baiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(15));//设置缩放比例
-        baiduMap.setOnMarkerClickListener(this);
+        baiduMap.setOnMarkerClickListener(new MarkerClickListener());
         UiSettings settings = baiduMap.getUiSettings();
         settings.setOverlookingGesturesEnabled(false);
         settings.setRotateGesturesEnabled(false);
@@ -237,24 +226,24 @@ public class Driver extends AppCompatActivity implements View.OnClickListener
     }
     public void addListener(){
         //悬浮按钮监听
-        go.setOnClickListener(this);
-        navigationView.setNavigationItemSelectedListener(this);
+        go.setOnClickListener(new ViewClickListener());
+        navigationView.setNavigationItemSelectedListener(new NavigationViewListener());
         //搜索按钮监听
-        search.setOnClickListener(this);
+        search.setOnClickListener(new ViewClickListener());
         //搜索
-        poiSearch.setOnGetPoiSearchResultListener(this);
+        poiSearch.setOnGetPoiSearchResultListener(new PoiSearchResultListener());
         //文本改变监听
-        searchByInput.addTextChangedListener(this);
-        searchByInput.setOnItemClickListener(this);
+        searchByInput.addTextChangedListener(new TextWatcher());
+        searchByInput.setOnItemClickListener(new ItemClickListener());
         //根据选定的Item进行反地图编码得到经纬度
-        searchByAddress.setOnGetGeoCodeResultListener(this);
+        searchByAddress.setOnGetGeoCodeResultListener(new GeoCoderResultListener());
         //路线规划
-        routePlanSearch.setOnGetRoutePlanResultListener(this);
-        baiduMap.setOnMapLongClickListener(this);
-        searchPeople.setOnClickListener(this);
-        searchOnRoad.setOnClickListener(this);
-        baiduMap.setOnMapClickListener(this);
-        setTraffic.setOnClickListener(this);
+        routePlanSearch.setOnGetRoutePlanResultListener(new GetRoutePlanResultListener());
+        baiduMap.setOnMapLongClickListener(new MapLongClickListener());
+        searchPeople.setOnClickListener(new ViewClickListener());
+        searchOnRoad.setOnClickListener(new ViewClickListener());
+        baiduMap.setOnMapClickListener(new MapClickListener());
+        setTraffic.setOnClickListener(new ViewClickListener());
     }
     public void isAndroidSix(){
         //初始化经纬度以及详细地址，判断是否为android6.0系统版本，如果是，需要动态添加权限
@@ -732,331 +721,9 @@ public class Driver extends AppCompatActivity implements View.OnClickListener
             routePlanSearch.destroy();
         }
     }
-    //全局点击监听
-    @Override
-    public void onClick(View v){
-        switch (v.getId()){
-            case R.id.driver_setTraffic:
-                clickNum++;
-                baiduMap.setTrafficEnabled(isTraffic.get(clickNum%2));
-                break;
-            case R.id.onroad_passenger_go:
-                baiduMap.hideInfoWindow();
-                startGo(start,markerLocation);
-                voiceNavi(start,markerLocation,new ArrayList<Poi>());
-                break;
-            case R.id.onroad_passenger_chat:
-                baiduMap.hideInfoWindow();
-                startActivity(new Intent(Driver.this,Chatting.class));
-                break;
-            case R.id.driver_onRoadPassenger:
-                try {
-                    getRoadNearbyCar(getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("user",""),String.valueOf(start.latitude),String.valueOf(start.longitude),String.valueOf(end.latitude),String.valueOf(end.longitude),"2018-09-02-9-00-00","2018-09-02-9-00-30");
-                }catch (NullPointerException e){
-                    Toast.makeText(getApplicationContext(),"请先选择一个目的地",Toast.LENGTH_SHORT).show();
-                }
-                break;
-            case R.id.driver_start:
-                startGo(start,end);
-                List<Poi> wayList = new ArrayList();//途径点目前最多支持3个。
-                try{
-                    if (onRoadPassengers!=null&&onRoadPassengers.size()!=0){
-                        wayList.add(MyPoi.getTransforPoi(onRoadPassengers.get(0)));
-                        wayList.add(MyPoi.getTransforPoi(onRoadPassengers.get(1)));
-                        wayList.add(MyPoi.getTransforPoi(onRoadPassengers.get(2)));
-                    }
-                    voiceNavi(start,end,wayList);
-                }catch (JSONException e){
 
-                }catch (NullPointerException e){
-                    Toast.makeText(getApplicationContext(),"请在地图上选择一个目的地",Toast.LENGTH_SHORT).show();
-                }
-                break;
-            case R.id.driver_search:
-                baiduMap.clear();//将地图上的标记清空
-                Toast.makeText(Driver.this,"查询...",Toast.LENGTH_SHORT).show();
-                //开始查询 根据城市名+地址
-                myAddress = searchByInput.getText().toString();
-                searchByAddress.geocode(new GeoCodeOption().city("湘潭市").address(myAddress));
-                baiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(13));
-                break;
-            case R.id.driver_refreshPassenger:
-                baiduMap.clear();
-                getNearbyCar("1365743316","27.90553","112.92297");
-                break;
-            default:
-                break;
-        }
-    }
-    //菜单选择
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        //判断点击了哪个item
-        switch (item.getItemId()){
-            //设置
-            case R.id.driver_nav_setting:
-                Intent to_setting = new Intent(Driver.this,Setting.class);
-                to_setting.putExtra("LEFT_HEAD_SCULPTURE",R.id.Left_head);
-                to_setting.putExtra("DriverOrPassenger","Driver");
-                startActivity(to_setting);
-                break;
-            //关于
-            case R.id.driver_nav_about:
-                Intent to_about = new Intent(Driver.this,About.class);
-                startActivity(to_about);
-                break;
-            //注销
-            case R.id.driver_nav_exit:
-                //点击了注销登录,将自动登录的选项还原
-                SharedPreferences sharedPreferences = getSharedPreferences("Setting",MODE_MULTI_PROCESS);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean("auto_login",false);
-                editor.commit();
-                Intent to_login = new Intent(Driver.this,Login.class);
-                startActivity(to_login);
-                finish();
-                break;
-            case R.id.driver_car_setting:
-                startActivity(new Intent(Driver.this,CarSetting.class));
-                break;
-            case R.id.driver_account_setting:
-                startActivity(new Intent(Driver.this,AccountSetting.class));
-                break;
-            default:
-                break;
-        }
-        return true;
-    }
-    //poi搜索结果
-    @Override
-    public void onGetPoiResult(PoiResult poiResult) {
-        searchResult = new ArrayList<>();
-        if(poiResult.error == SearchResult.ERRORNO.NO_ERROR){
-            if(searchResult.size()!=0){
-                //如果不是空  就先清除之前的查询结果
-                searchResult.clear();
-                for (int i = 0; i < poiResult.getAllPoi().size();i++){
-                    //添加进入列表
-                    searchResult.add(poiResult.getAllPoi().get(i).name+","+poiResult.getAllPoi().get(i).area);
-                }
-                //适配器的初始化和设置适配器
-                ArrayAdapter<String> resultAdapter = new ArrayAdapter<>(getApplicationContext(),R.layout.search_content,searchResult);
-                searchByInput.setAdapter(resultAdapter);
-            }else {
-                for (int i = 0; i < poiResult.getAllPoi().size();i++){
-                    searchResult.add(poiResult.getAllPoi().get(i).name+","+poiResult.getAllPoi().get(i).address);
-                }
-                ArrayAdapter<String> resultAdapter = new ArrayAdapter<>(getApplicationContext(),R.layout.search_content,searchResult);
-                searchByInput.setAdapter(resultAdapter);
-            }
-        }
-    }
-    @Override
-    public void onGetPoiDetailResult(PoiDetailResult poiDetailResult) {
-    }
-    @Override
-    public void onGetPoiIndoorResult(PoiIndoorResult poiIndoorResult) {
-    }
-    @Override
-    public void onGetGeoCodeResult(GeoCodeResult geoCodeResult) {
-        if(geoCodeResult.error==SearchResult.ERRORNO.NO_ERROR){
-            end = new LatLng(geoCodeResult.getLocation().latitude,geoCodeResult.getLocation().longitude);
-            OverlayOptions destinationOption = new MarkerOptions()
-                    .position(end).
-                            icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_end));
-            baiduMap.addOverlay(destinationOption);
-            baiduMap.addOverlay(myLocationOption);
-        }else {
-            Toast.makeText(Driver.this,"查询失败",Toast.LENGTH_SHORT).show();
-            baiduMap.addOverlay(myLocationOption);
-        }
-    }
-    @Override
-    public void onGetReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
-    }
-    @Override
-    public void onGetWalkingRouteResult(WalkingRouteResult walkingRouteResult) {
-    }
 
-    @Override
-    public void onGetTransitRouteResult(TransitRouteResult transitRouteResult) {
-    }
-    @Override
-    public void onGetMassTransitRouteResult(MassTransitRouteResult massTransitRouteResult) {
-    }
-    @Override
-    public void onGetDrivingRouteResult(DrivingRouteResult drivingRouteResult) {
-        //驾车路线规划
-        if(drivingRouteResult.error== SearchResult.ERRORNO.NO_ERROR){
-            drawRouteLine(drivingRouteResult,0);
-        }
-    }
-    @Override
-    public void onGetIndoorRouteResult(IndoorRouteResult indoorRouteResult) {
-    }
-    @Override
-    public void onGetBikingRouteResult(BikingRouteResult bikingRouteResult) {
-    }
-
-    @Override
-    public void onMapLongClick(LatLng latLng) {
-        baiduMap.clear();
-        OverlayOptions options = new MarkerOptions()
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_mylocation))
-                .position(start);
-        baiduMap.addOverlay(options);
-
-    }
-
-    @Override
-    public void onMapClick(final LatLng latLng) {
-        baiduMap.hideInfoWindow();
-        end = latLng;
-        AlertDialog notice = new AlertDialog.Builder(Driver.this)
-                .setIcon(R.drawable.ic_start)
-                .setTitle(getMessage(latLng)+",确定要去这个地方吗?")
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        OverlayOptions optionEnd = new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_end))
-                                .position(latLng);
-                        baiduMap.addOverlay(optionEnd);
-                        OverlayOptions optionStart = new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_latestlocation))
-                                .position(start);
-                        baiduMap.addOverlay(optionStart);
-                        startGo(start,latLng);
-                        //setTimer();
-                        dialog.dismiss();
-                    }
-                }).create();
-        notice.show();
-    }
-    @Override
-    public boolean onMapPoiClick(final MapPoi mapPoi) {
-        end = mapPoi.getPosition();
-        AlertDialog notice = new AlertDialog.Builder(Driver.this)
-                .setIcon(R.drawable.ic_start)
-                .setTitle(mapPoi.getName()+",确定要去这个地方吗?")
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        OverlayOptions optionEnd = new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_end))
-                                .position(mapPoi.getPosition());
-                        baiduMap.addOverlay(optionEnd);
-                        OverlayOptions optionStart = new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_latestlocation))
-                                .position(start);
-                        baiduMap.addOverlay(optionStart);
-                        startGo(start,mapPoi.getPosition());
-                        //setTimer();
-                        dialog.dismiss();
-                    }
-                }).create();
-        notice.show();
-        return true;
-    }
-
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        //改变前
-    }
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-        //改变中
-        addSearch();
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
-        //改变后
-        addSearch();
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        try{
-            //记录位置
-            myAddress = searchResult.get(position);
-            searchByAddress.geocode(new GeoCodeOption().city(myCity).address(myAddress));
-            baiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(13));
-        }catch (NullPointerException e){
-            Toast.makeText(Driver.this,"请输入内容",Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    //获得附近的车
-
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        try{
-            markerLocation = marker.getPosition();
-            LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
-            View view = inflater.inflate(R.layout.on_road_passenger, null);
-            view.setBackgroundResource(R.drawable.icon_info_background);
-            TextView userName = (TextView)view.findViewById(R.id.onroad_passenger_name);
-            TextView userTel  = (TextView)view.findViewById(R.id.onroad_passenger_tel);
-            TextView startToEnd = (TextView)view.findViewById(R.id.onroad_passenger_startToEnd);
-            TextView startTime = (TextView)view.findViewById(R.id.onroad_passenger_starttime);
-            TextView endTime = (TextView)view.findViewById(R.id.onroad_passenger_endtime);
-            Button toChat = (Button)view.findViewById(R.id.onroad_passenger_chat);
-            Button toGo = (Button)view.findViewById(R.id.onroad_passenger_go);
-            Button cancel = (Button)view.findViewById(R.id.onroad_passenger_cancel);
-            Button toCall = (Button)view.findViewById(R.id.onroad_passenger_call);
-            toChat.setOnClickListener(this);
-            toGo.setOnClickListener(this);
-            for(int i = 0;i < onRoadPassengers.size();i++){
-                if(marker.getExtraInfo().getInt("Number")==i){
-                    try{
-                        userName.setText(onRoadPassengers.get(i).getString("name"));
-                        userTel.setText(onRoadPassengers.get(i).getString("userid"));
-                        startToEnd.setText(onRoadPassengers.get(i).getString("startplace")+"---->"+onRoadPassengers.get(i).getString("destination"));
-                        startTime.setText(onRoadPassengers.get(i).getString("startdate"));
-                        endTime.setText(onRoadPassengers.get(i).getString("enddate"));
-                        final String telephoneNumber = userTel.getText().toString();
-                        toCall.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+telephoneNumber)));
-                            }
-                        });
-                        final AlertDialog dialog = new AlertDialog.Builder(this)
-                                .setTitle("乘客信息")
-                                .setView(view)
-                                .create();
-                        dialog.setTitle("附近乘客");
-                        dialog.setCanceledOnTouchOutside(false);
-                        dialog.show();
-                        //InfoWindow infoWindow = new InfoWindow(view, marker.getPosition(),10);
-                        //baiduMap.showInfoWindow(infoWindow);
-                        cancel.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                dialog.dismiss();
-                            }
-                        });
-                    }catch (Exception e){
-
-                    }
-                }
-            }
-        }catch (NullPointerException e){
-
-        }
-        return true;
-    }
-    class MyLocationListener implements BDLocationListener {
+    private class MyLocationListener implements BDLocationListener {
 
         /*
          * 如要实现通过GPS定位起点 需要将mapView变为static
@@ -1081,6 +748,357 @@ public class Driver extends AppCompatActivity implements View.OnClickListener
                         + location.getStreet()
                         + location.getStreetNumber());
             }
+        }
+    }
+    private class NavigationViewListener implements NavigationView.OnNavigationItemSelectedListener{
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            //判断点击了哪个item
+            switch (item.getItemId()){
+                //设置
+                case R.id.driver_nav_setting:
+                    Intent to_setting = new Intent(Driver.this,Setting.class);
+                    to_setting.putExtra("LEFT_HEAD_SCULPTURE",R.id.Left_head);
+                    to_setting.putExtra("DriverOrPassenger","Driver");
+                    startActivity(to_setting);
+                    break;
+                //关于
+                case R.id.driver_nav_about:
+                    Intent to_about = new Intent(Driver.this,About.class);
+                    startActivity(to_about);
+                    break;
+                //注销
+                case R.id.driver_nav_exit:
+                    //点击了注销登录,将自动登录的选项还原
+                    SharedPreferences sharedPreferences = getSharedPreferences("Setting",MODE_MULTI_PROCESS);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean("auto_login",false);
+                    editor.commit();
+                    Intent to_login = new Intent(Driver.this,Login.class);
+                    startActivity(to_login);
+                    finish();
+                    break;
+                case R.id.driver_car_setting:
+                    startActivity(new Intent(Driver.this,CarSetting.class));
+                    break;
+                case R.id.driver_account_setting:
+                    startActivity(new Intent(Driver.this,AccountSetting.class));
+                    break;
+                default:
+                    break;
+            }
+            return true;
+        }
+    }
+    private class PoiSearchResultListener implements OnGetPoiSearchResultListener{
+
+        //poi搜索结果
+        @Override
+        public void onGetPoiResult(PoiResult poiResult) {
+            searchResult = new ArrayList<>();
+            if(poiResult.error == SearchResult.ERRORNO.NO_ERROR){
+                if(searchResult.size()!=0){
+                    //如果不是空  就先清除之前的查询结果
+                    searchResult.clear();
+                    for (int i = 0; i < poiResult.getAllPoi().size();i++){
+                        //添加进入列表
+                        searchResult.add(poiResult.getAllPoi().get(i).name+","+poiResult.getAllPoi().get(i).area);
+                    }
+                    //适配器的初始化和设置适配器
+                    ArrayAdapter<String> resultAdapter = new ArrayAdapter<>(getApplicationContext(),R.layout.search_content,searchResult);
+                    searchByInput.setAdapter(resultAdapter);
+                }else {
+                    for (int i = 0; i < poiResult.getAllPoi().size();i++){
+                        searchResult.add(poiResult.getAllPoi().get(i).name+","+poiResult.getAllPoi().get(i).address);
+                    }
+                    ArrayAdapter<String> resultAdapter = new ArrayAdapter<>(getApplicationContext(),R.layout.search_content,searchResult);
+                    searchByInput.setAdapter(resultAdapter);
+                }
+            }
+        }
+        @Override
+        public void onGetPoiDetailResult(PoiDetailResult poiDetailResult) {
+        }
+        @Override
+        public void onGetPoiIndoorResult(PoiIndoorResult poiIndoorResult) {
+        }
+    }
+    private class GeoCoderResultListener implements OnGetGeoCoderResultListener{
+
+        @Override
+        public void onGetGeoCodeResult(GeoCodeResult geoCodeResult) {
+            if(geoCodeResult.error==SearchResult.ERRORNO.NO_ERROR){
+                end = new LatLng(geoCodeResult.getLocation().latitude,geoCodeResult.getLocation().longitude);
+                OverlayOptions destinationOption = new MarkerOptions()
+                        .position(end).
+                                icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_end));
+                baiduMap.addOverlay(destinationOption);
+                baiduMap.addOverlay(myLocationOption);
+            }else {
+                Toast.makeText(Driver.this,"查询失败",Toast.LENGTH_SHORT).show();
+                baiduMap.addOverlay(myLocationOption);
+            }
+        }
+        @Override
+        public void onGetReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
+        }
+    }
+    private class GetRoutePlanResultListener implements OnGetRoutePlanResultListener{
+        @Override
+        public void onGetWalkingRouteResult(WalkingRouteResult walkingRouteResult) {
+        }
+
+        @Override
+        public void onGetTransitRouteResult(TransitRouteResult transitRouteResult) {
+        }
+        @Override
+        public void onGetMassTransitRouteResult(MassTransitRouteResult massTransitRouteResult) {
+        }
+        @Override
+        public void onGetDrivingRouteResult(DrivingRouteResult drivingRouteResult) {
+            //驾车路线规划
+            if(drivingRouteResult.error== SearchResult.ERRORNO.NO_ERROR){
+                drawRouteLine(drivingRouteResult,0);
+            }
+        }
+        @Override
+        public void onGetIndoorRouteResult(IndoorRouteResult indoorRouteResult) {
+        }
+        @Override
+        public void onGetBikingRouteResult(BikingRouteResult bikingRouteResult) {
+        }
+
+    }
+    private class MapLongClickListener implements BaiduMap.OnMapLongClickListener{
+
+        @Override
+        public void onMapLongClick(LatLng latLng) {
+            baiduMap.clear();
+            OverlayOptions options = new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_mylocation))
+                    .position(start);
+            baiduMap.addOverlay(options);
+
+        }
+
+    }
+    private class MapClickListener implements BaiduMap.OnMapClickListener {
+
+        @Override
+        public void onMapClick(final LatLng latLng) {
+            baiduMap.hideInfoWindow();
+            end = latLng;
+            AlertDialog notice = new AlertDialog.Builder(Driver.this)
+                    .setIcon(R.drawable.ic_start)
+                    .setTitle(getMessage(latLng)+",确定要去这个地方吗?")
+                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            OverlayOptions optionEnd = new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_end))
+                                    .position(latLng);
+                            baiduMap.addOverlay(optionEnd);
+                            OverlayOptions optionStart = new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_latestlocation))
+                                    .position(start);
+                            baiduMap.addOverlay(optionStart);
+                            startGo(start,latLng);
+                            //setTimer();
+                            dialog.dismiss();
+                        }
+                    }).create();
+            notice.show();
+        }
+        @Override
+        public boolean onMapPoiClick(final MapPoi mapPoi) {
+            end = mapPoi.getPosition();
+            AlertDialog notice = new AlertDialog.Builder(Driver.this)
+                    .setIcon(R.drawable.ic_start)
+                    .setTitle(mapPoi.getName()+",确定要去这个地方吗?")
+                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            OverlayOptions optionEnd = new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_end))
+                                    .position(mapPoi.getPosition());
+                            baiduMap.addOverlay(optionEnd);
+                            OverlayOptions optionStart = new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_latestlocation))
+                                    .position(start);
+                            baiduMap.addOverlay(optionStart);
+                            startGo(start,mapPoi.getPosition());
+                            //setTimer();
+                            dialog.dismiss();
+                        }
+                    }).create();
+            notice.show();
+            return true;
+        }
+
+    }
+    private class TextWatcher implements android.text.TextWatcher{
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            //改变前
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            //改变中
+            addSearch();
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            //改变后
+            addSearch();
+        }
+
+    }
+    private class ItemClickListener implements AdapterView.OnItemClickListener{
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            try{
+                //记录位置
+                myAddress = searchResult.get(position);
+                searchByAddress.geocode(new GeoCodeOption().city(myCity).address(myAddress));
+                baiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(13));
+            }catch (NullPointerException e){
+                Toast.makeText(Driver.this,"请输入内容",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+    private class ViewClickListener implements View.OnClickListener{
+
+        //全局点击监听
+        @Override
+        public void onClick(View v){
+            switch (v.getId()){
+                case R.id.driver_setTraffic:
+                    clickNum++;
+                    baiduMap.setTrafficEnabled(isTraffic.get(clickNum%2));
+                    break;
+                case R.id.onroad_passenger_go:
+                    baiduMap.hideInfoWindow();
+                    startGo(start,markerLocation);
+                    voiceNavi(start,markerLocation,new ArrayList<Poi>());
+                    break;
+                case R.id.onroad_passenger_chat:
+                    baiduMap.hideInfoWindow();
+                    startActivity(new Intent(Driver.this,Chatting.class));
+                    break;
+                case R.id.driver_onRoadPassenger:
+                    try {
+                        getRoadNearbyCar(getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("user",""),String.valueOf(start.latitude),String.valueOf(start.longitude),String.valueOf(end.latitude),String.valueOf(end.longitude),"2018-09-02-9-00-00","2018-09-02-9-00-30");
+                    }catch (NullPointerException e){
+                        Toast.makeText(getApplicationContext(),"请先选择一个目的地",Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case R.id.driver_start:
+                    startGo(start,end);
+                    List<Poi> wayList = new ArrayList();//途径点目前最多支持3个。
+                    try{
+                        if (onRoadPassengers!=null&&onRoadPassengers.size()!=0){
+                            wayList.add(MyPoi.getTransforPoi(onRoadPassengers.get(0)));
+                            wayList.add(MyPoi.getTransforPoi(onRoadPassengers.get(1)));
+                            wayList.add(MyPoi.getTransforPoi(onRoadPassengers.get(2)));
+                        }
+                        voiceNavi(start,end,wayList);
+                    }catch (JSONException e){
+
+                    }catch (NullPointerException e){
+                        Toast.makeText(getApplicationContext(),"请在地图上选择一个目的地",Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case R.id.driver_search:
+                    baiduMap.clear();//将地图上的标记清空
+                    Toast.makeText(Driver.this,"查询...",Toast.LENGTH_SHORT).show();
+                    //开始查询 根据城市名+地址
+                    myAddress = searchByInput.getText().toString();
+                    searchByAddress.geocode(new GeoCodeOption().city("湘潭市").address(myAddress));
+                    baiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(13));
+                    break;
+                case R.id.driver_refreshPassenger:
+                    baiduMap.clear();
+                    getNearbyCar("1365743316","27.90553","112.92297");
+                    break;
+                default:
+                    break;
+            }
+        }
+
+
+    }
+    private class MarkerClickListener implements BaiduMap.OnMarkerClickListener {
+
+        @Override
+        public boolean onMarkerClick(Marker marker) {
+            try{
+                markerLocation = marker.getPosition();
+                LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+                View view = inflater.inflate(R.layout.on_road_passenger, null);
+                view.setBackgroundResource(R.drawable.icon_info_background);
+                TextView userName = (TextView)view.findViewById(R.id.onroad_passenger_name);
+                TextView userTel  = (TextView)view.findViewById(R.id.onroad_passenger_tel);
+                TextView startToEnd = (TextView)view.findViewById(R.id.onroad_passenger_startToEnd);
+                TextView startTime = (TextView)view.findViewById(R.id.onroad_passenger_starttime);
+                TextView endTime = (TextView)view.findViewById(R.id.onroad_passenger_endtime);
+                Button toChat = (Button)view.findViewById(R.id.onroad_passenger_chat);
+                Button toGo = (Button)view.findViewById(R.id.onroad_passenger_go);
+                Button cancel = (Button)view.findViewById(R.id.onroad_passenger_cancel);
+                Button toCall = (Button)view.findViewById(R.id.onroad_passenger_call);
+                toChat.setOnClickListener(new ViewClickListener());
+                toGo.setOnClickListener(new ViewClickListener());
+                for(int i = 0;i < onRoadPassengers.size();i++){
+                    if(marker.getExtraInfo().getInt("Number")==i){
+                        try{
+                            userName.setText(onRoadPassengers.get(i).getString("name"));
+                            userTel.setText(onRoadPassengers.get(i).getString("userid"));
+                            startToEnd.setText(onRoadPassengers.get(i).getString("startplace")+"---->"+onRoadPassengers.get(i).getString("destination"));
+                            startTime.setText(onRoadPassengers.get(i).getString("startdate"));
+                            endTime.setText(onRoadPassengers.get(i).getString("enddate"));
+                            final String telephoneNumber = userTel.getText().toString();
+                            toCall.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+telephoneNumber)));
+                                }
+                            });
+                            final AlertDialog dialog = new AlertDialog.Builder(getApplicationContext())
+                                    .setTitle("乘客信息")
+                                    .setView(view)
+                                    .create();
+                            dialog.setTitle("附近乘客");
+                            dialog.setCanceledOnTouchOutside(false);
+                            dialog.show();
+                            //InfoWindow infoWindow = new InfoWindow(view, marker.getPosition(),10);
+                            //baiduMap.showInfoWindow(infoWindow);
+                            cancel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    dialog.dismiss();
+                                }
+                            });
+                        }catch (Exception e){
+
+                        }
+                    }
+                }
+            }catch (NullPointerException e){
+
+            }
+            return true;
         }
     }
 }

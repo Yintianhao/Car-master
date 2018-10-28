@@ -22,7 +22,7 @@ public class TimeCounter extends CountDownTimer{
     public void onTick(long millisUntilFinished) {
         String time = "(" + millisUntilFinished / 1000 + ")秒";
         textView.setClickable(false);
-        textView.setBackgroundResource(R.drawable.grey_background);
+        //textView.setBackgroundResource(R.drawable.grey_background);
         textView.setText(time);
     }
     //计时完毕时触发

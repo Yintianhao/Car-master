@@ -233,6 +233,7 @@ public class Login extends AppCompatActivity implements RadioGroup.OnCheckedChan
         user.setVisibility(View.VISIBLE);
         passWord.setVisibility(View.VISIBLE);
         userType.setVisibility(View.VISIBLE);
+        title.setVisibility(View.VISIBLE);
         final ChangeBounds bounds_ = new ChangeBounds();
         bounds_.setDuration(1500);
         bounds_.addListener(new Transition.TransitionListener() {
