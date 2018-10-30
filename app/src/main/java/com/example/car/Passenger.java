@@ -97,6 +97,8 @@ import java.util.List;
 import java.util.Map;
 
 import Tool.Const;
+import WheelView.Adapter.NumericWheelAdapter;
+import WheelView.WheelView;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class Passenger extends AppCompatActivity{
@@ -124,10 +126,10 @@ public class Passenger extends AppCompatActivity{
     LatLng b;
     AutoCompleteTextView startInput;
     AutoCompleteTextView endInput;
-    EditText startTimeInput_h;
-    EditText startTimeInput_m;
-    EditText endTimeInput_h;
-    EditText endTimeInput_m;
+    WheelView startTimeInput_h;
+    WheelView startTimeInput_m;
+    WheelView endTimeInput_h;
+    WheelView endTimeInput_m;
     List<JSONObject> onRoadPassengers;
     List<Boolean> isTraffic;
     int clickNum = 0;
@@ -202,10 +204,15 @@ public class Passenger extends AppCompatActivity{
         //view  = View.inflate(this,R.layout.order_layout,null);
         startInput = (AutoCompleteTextView) parent.findViewById(R.id.startPlace);
         endInput = (AutoCompleteTextView) parent.findViewById(R.id.endPlace);
-        startTimeInput_h = (EditText) parent.findViewById(R.id.startTime_h);
-        startTimeInput_m = (EditText) parent.findViewById(R.id.startTime_m);
-        endTimeInput_h = (EditText) parent.findViewById(R.id.endTime_h);
-        endTimeInput_m = (EditText) parent.findViewById(R.id.endTime_m);
+        startTimeInput_h = (WheelView) parent.findViewById(R.id.startTime_h);
+        startTimeInput_h.setViewAdapter(new NumericWheelAdapter(getApplicationContext(),00,24));
+        startTimeInput_h.setBackground(getResources().getDrawable(R.drawable.input_bg));
+        startTimeInput_m = (WheelView) parent.findViewById(R.id.startTime_m);
+        startTimeInput_m.setViewAdapter(new NumericWheelAdapter(getApplicationContext(),00,60));
+        endTimeInput_h = (WheelView) parent.findViewById(R.id.endTime_h);
+        endTimeInput_h.setViewAdapter(new NumericWheelAdapter(getApplicationContext(),00,24));;
+        endTimeInput_m = (WheelView) parent.findViewById(R.id.endTime_m);
+        endTimeInput_m.setViewAdapter(new NumericWheelAdapter(getApplicationContext(),00,60));
         startInput.addTextChangedListener(new MyTextWatcher(startInput));
         endInput.addTextChangedListener(new MyTextWatcher(endInput));
     }
@@ -627,12 +634,14 @@ public class Passenger extends AppCompatActivity{
         }
         @Override
         public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            addSearch(startInput.getText().toString());
+            addSearch(charSequence.toString());
+            //Toast.makeText(getApplicationContext(),"onTextChanged--"+charSequence.toString(),Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void afterTextChanged(Editable editable) {
-
+            addSearch(editable.toString());
+            //Toast.makeText(getApplicationContext(),"afterTextChanged--"+editable.toString(),Toast.LENGTH_SHORT).show();
         }
         @Override
         public void onGetPoiResult(PoiResult poiResult) {
@@ -970,7 +979,7 @@ public class Passenger extends AppCompatActivity{
                     //点击了注销登录,将自动登录的选项还原
                     SharedPreferences sharedPreferences = getSharedPreferences("Setting",MODE_MULTI_PROCESS);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putBoolean("auto_login",false);
+                    editor.putString("canLogin","no");
                     editor.commit();
                     Intent to_login = new Intent(Passenger.this,Login.class);
                     startActivity(to_login);

@@ -3,7 +3,7 @@
     android:orientation="vertical"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:background="#d8e0e8">
+    android:background="#C387CEFA">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/msg_recycler_view"

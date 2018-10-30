@@ -773,7 +773,7 @@ public class Driver extends AppCompatActivity {
                     //点击了注销登录,将自动登录的选项还原
                     SharedPreferences sharedPreferences = getSharedPreferences("Setting",MODE_MULTI_PROCESS);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putBoolean("auto_login",false);
+                    editor.putString("canLogin","no");
                     editor.commit();
                     Intent to_login = new Intent(Driver.this,Login.class);
                     startActivity(to_login);

@@ -113,26 +113,24 @@
     <!-- 连续广播（允许一个程序收到广播后快速收到下一个广播） -->
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
 
-
-    <!--用于访问网络，网络定位需要上网-->
+    <!-- 用于访问网络，网络定位需要上网 -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <!--写入扩展存储，向扩展卡写入数据，用于写入缓存定位数据-->
+    <!-- 写入扩展存储，向扩展卡写入数据，用于写入缓存定位数据 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <!--用于进行网络定位-->
+    <!-- 用于进行网络定位 -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!--获取运营商信息，用于支持提供运营商信息相关的接口-->
+    <!-- 获取运营商信息，用于支持提供运营商信息相关的接口 -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!--用于访问GPS定位-->
+    <!-- 用于访问GPS定位 -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <!--用于读取手机当前的状态-->
+    <!-- 用于读取手机当前的状态 -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <!--用于访问wifi网络信息，wifi信息会用于进行网络定位-->
+    <!-- 用于访问wifi网络信息，wifi信息会用于进行网络定位 -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <!--这个权限用于获取wifi的获取权限，wifi信息会用来进行网络定位-->
+    <!-- 这个权限用于获取wifi的获取权限，wifi信息会用来进行网络定位 -->
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <!--这个权限用于允许程序在手机屏幕关闭后后台进程仍然运行-->
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-
+    <!-- 这个权限用于允许程序在手机屏幕关闭后后台进程仍然运行 -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -142,7 +140,6 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
 
     <application
         android:name="android.app.Application"
@@ -154,8 +151,10 @@
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="67o67BXlV3mgev8rXfwSONqFPBIXuNte" />
-        <meta-data android:name="com.amap.api.v2.apikey"
-            android:value="c0de80d0d4c03aa3c0ed7e46df3c584c"/>
+        <meta-data
+            android:name="com.amap.api.v2.apikey"
+            android:value="c0de80d0d4c03aa3c0ed7e46df3c584c" />
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.example.car.fileprovider"
@@ -166,16 +165,22 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".Login"
+        <activity android:name=".Welcome"
             android:theme="@style/NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.amap.api.navi.AmapRouteActivity"
-            android:theme="@android:style/Theme.NoTitleBar"
-            android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity
+            android:name=".Login"
+            android:theme="@style/NoActionBar">
+
+        </activity>
+        <activity
+            android:name="com.amap.api.navi.AmapRouteActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@android:style/Theme.NoTitleBar" />
         <activity android:name=".RegisterOfPassenger" />
         <activity android:name=".Passenger" />
         <activity android:name=".Setting" />
@@ -196,8 +201,8 @@
             android:name="com.hyphenate.chat.EMJobService"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
-        <!--高德服务-->
-        <service android:name="com.amap.api.location.APSService"></service>
+        <!-- 高德服务 -->
+        <service android:name="com.amap.api.location.APSService" />
         <!-- 声明SDK所需的receiver -->
         <receiver android:name="com.hyphenate.chat.EMMonitorReceiver">
             <intent-filter>
@@ -220,7 +225,8 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity android:name=".MatchShow"></activity>
+        <activity android:name=".MatchShow" />
+
     </application>
 
 </manifest>

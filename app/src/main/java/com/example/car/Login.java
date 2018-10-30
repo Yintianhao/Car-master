@@ -79,7 +79,7 @@ public class Login extends AppCompatActivity implements RadioGroup.OnCheckedChan
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        SDKInitializer.initialize(getApplicationContext());//百度地图SDK初始化
+        //SDKInitializer.initialize(getApplicationContext());//百度地图SDK初始化
         initMob();
         initComponents();
         showPreviousInfo();
@@ -448,18 +448,25 @@ public class Login extends AppCompatActivity implements RadioGroup.OnCheckedChan
                                    Toast.makeText(getApplicationContext(),"乘客身份登录",Toast.LENGTH_SHORT).show();
                                    editor.putString("user",accountNumber);
                                    editor.putString("passWord",password);
+                                   editor.putString("canLogin","passenger");
                                    editor.commit();
                                    startActivity(new Intent(Login.this,Passenger.class));
                                    finish();
                                }else {
-                                   //changeInfo(user.getText().toString(),"1");
+                                   Const.userName = accountNumber;
+                                   Const.passWord = password;
+                                   editor.putString("user",accountNumber);
+                                   editor.putString("passWord",password);
+                                   editor.putString("canLogin","driver");
+                                   editor.commit();
                                    Toast.makeText(getApplicationContext(),"司机身份登录",Toast.LENGTH_SHORT).show();
                                    startActivity(new Intent(Login.this, Driver.class));
                                    finish();
                                }
                             }else{
+                                editor.putString("canLogin","no");
+                                editor.commit();
                                 Toast.makeText(getApplicationContext(),"账号或者密码错误",Toast.LENGTH_SHORT).show();
-
                             }
                         } catch (JSONException e) {
                             //做自己的请求异常操作，如Toast提示（“无网络连接”等）

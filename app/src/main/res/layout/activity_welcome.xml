@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:background="#C387CEFA"
+    android:gravity="center_horizontal">
+
+    <Tool.BeautyTextView
+        android:id="@+id/welcome_text"
+        android:layout_width="300dp"
+        android:layout_height="100dp"
+        android:text="校园拼车GO"
+        android:textSize="40sp"
+        android:gravity="center_horizontal"
+        android:textStyle="italic"
+        android:layout_marginTop="180dp"/>
+</LinearLayout>

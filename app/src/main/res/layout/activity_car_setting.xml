@@ -18,7 +18,7 @@
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:text="车牌:"
-            android:textSize="22sp"
+            android:textSize="18sp"
             android:gravity="center"/>
         <EditText
             android:id="@+id/carId"
@@ -37,7 +37,7 @@
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:text="品牌:"
-            android:textSize="22sp"
+            android:textSize="18sp"
             android:gravity="center"/>
         <EditText
             android:id="@+id/carBrand"
@@ -55,7 +55,7 @@
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:text="种类:"
-            android:textSize="22sp"
+            android:textSize="18sp"
             android:gravity="center"/>
         <EditText
             android:id="@+id/carModel"
@@ -73,7 +73,7 @@
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:text="颜色:"
-            android:textSize="22sp"
+            android:textSize="18sp"
             android:gravity="center"/>
         <EditText
             android:id="@+id/carColor"
@@ -91,7 +91,7 @@
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:text="容量:"
-            android:textSize="22sp"
+            android:textSize="18sp"
             android:gravity="center"/>
         <EditText
             android:id="@+id/carCapacity"
@@ -113,6 +113,6 @@
             android:layout_height="45dp"
             android:layout_gravity="center_horizontal"
             android:text="保  存"
-            android:textSize="20sp"/>
+            android:textSize="18sp"/>
     </LinearLayout>
 </LinearLayout>
