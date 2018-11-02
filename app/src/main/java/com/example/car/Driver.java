@@ -996,7 +996,8 @@ public class Driver extends AppCompatActivity {
                     break;
                 case R.id.onroad_passenger_chat:
                     baiduMap.hideInfoWindow();
-                    startActivity(new Intent(Driver.this,Chatting.class));
+                    Intent intent = new Intent(Driver.this,Chatting.class);
+                    startActivity(intent);
                     break;
                 case R.id.driver_onRoadPassenger:
                     try {
@@ -1060,40 +1061,41 @@ public class Driver extends AppCompatActivity {
                 Button toCall = (Button)view.findViewById(R.id.onroad_passenger_call);
                 toChat.setOnClickListener(new ViewClickListener());
                 toGo.setOnClickListener(new ViewClickListener());
-                for(int i = 0;i < onRoadPassengers.size();i++){
-                    if(marker.getExtraInfo().getInt("Number")==i){
-                        try{
-                            userName.setText(onRoadPassengers.get(i).getString("name"));
-                            userTel.setText(onRoadPassengers.get(i).getString("userid"));
-                            startToEnd.setText(onRoadPassengers.get(i).getString("startplace")+"---->"+onRoadPassengers.get(i).getString("destination"));
-                            startTime.setText(onRoadPassengers.get(i).getString("startdate"));
-                            endTime.setText(onRoadPassengers.get(i).getString("enddate"));
-                            final String telephoneNumber = userTel.getText().toString();
-                            toCall.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+telephoneNumber)));
-                                }
-                            });
-                            final AlertDialog dialog = new AlertDialog.Builder(getApplicationContext())
-                                    .setTitle("乘客信息")
-                                    .setView(view)
-                                    .create();
-                            dialog.setTitle("附近乘客");
-                            dialog.setCanceledOnTouchOutside(false);
-                            dialog.show();
-                            //InfoWindow infoWindow = new InfoWindow(view, marker.getPosition(),10);
-                            //baiduMap.showInfoWindow(infoWindow);
-                            cancel.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    dialog.dismiss();
-                                }
-                            });
-                        }catch (Exception e){
-
+                int i = marker.getExtraInfo().getInt("Number");
+                try{
+                    userName.setText(onRoadPassengers.get(i).getString("name"));
+                    userTel.setText(onRoadPassengers.get(i).getString("userid"));
+                    startToEnd.setText(onRoadPassengers.get(i).getString("startplace")+"---->"+onRoadPassengers.get(i).getString("destination"));
+                    startTime.setText(onRoadPassengers.get(i).getString("startdate"));
+                    endTime.setText(onRoadPassengers.get(i).getString("enddate"));
+                    final String telephoneNumber = userTel.getText().toString();
+                    SharedPreferences.Editor editor = getSharedPreferences("Setting",MODE_MULTI_PROCESS).edit();
+                    editor.putString("destinationTel",userTel.getText().toString());
+                    editor.commit();
+                    Log.d("对方账号是",userTel.getText().toString());
+                    toCall.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+telephoneNumber)));
                         }
-                    }
+                    });
+                    final AlertDialog dialog = new AlertDialog.Builder(Driver.this)
+                            .setTitle("乘客信息")
+                            .setView(view)
+                            .create();
+                    dialog.setTitle("附近乘客");
+                    dialog.setCanceledOnTouchOutside(false);
+                    dialog.show();
+                    //InfoWindow infoWindow = new InfoWindow(view, marker.getPosition(),10);
+                    //baiduMap.showInfoWindow(infoWindow);
+                    cancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dialog.dismiss();
+                        }
+                    });
+                }catch (Exception e){
+
                 }
             }catch (NullPointerException e){
 

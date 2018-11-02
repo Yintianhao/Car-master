@@ -265,7 +265,7 @@ public class Passenger extends AppCompatActivity{
         baiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(15));//设置缩放比例
         baiduMap.setOnMarkerClickListener(new MarkerClickerListener());
         baiduMap.setTrafficEnabled(true);
-        baiduMap.setOnMapClickListener(new MapClickerListener());
+        //baiduMap.setOnMapClickListener(new MapClickerListener());
         UiSettings settings = baiduMap.getUiSettings();
         settings.setOverlookingGesturesEnabled(false);
         settings.setRotateGesturesEnabled(false);
@@ -446,7 +446,7 @@ public class Passenger extends AppCompatActivity{
         //防止重复请求，所以先取消tag标识的请求队列
         requestQueue.cancelAll(tag);
         //创建StringRequest，定义字符串请求的请求方式为POST(省略第一个参数会默认为GET方式)
-        final Passenger.MyStringRequest request = new Passenger.MyStringRequest(Request.Method.POST, url,
+        Passenger.MyStringRequest request = new Passenger.MyStringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -458,6 +458,7 @@ public class Passenger extends AppCompatActivity{
                                 JSONArray jsonArray = new JSONObject(response).getJSONArray("result");
                                 Toast.makeText(Passenger.this,"为你找到1个司机和"+(jsonArray.length()-2)+"个顺路乘客",Toast.LENGTH_SHORT).show();
                                 for(int i = 0;i < jsonArray.length();i++){
+
                                     Bundle bundle = new Bundle();
                                     bundle.putInt("Number",i);//将标记都标上号,即添加额外信息
                                     onRoadPassengers.add(jsonArray.getJSONObject(i));
@@ -813,6 +814,7 @@ public class Passenger extends AppCompatActivity{
 
         @Override
         public boolean onMarkerClick(Marker marker) {
+            Toast.makeText(getApplicationContext(),"标记监听",Toast.LENGTH_SHORT).show();
             LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
             View view = inflater.inflate(R.layout.on_road_pandd, null);
             view.setBackgroundResource(R.drawable.icon_info_background);
@@ -827,124 +829,121 @@ public class Passenger extends AppCompatActivity{
             Button toChat;
             Button cancel;
             Button toCall;
-            for(int i = 0;i < onRoadPassengers.size();i++){
-                if(marker.getExtraInfo().getInt("Number")==i){
-                    try{
-                        if(onRoadPassengers.get(i).getString("supplycar").equals("1")){
-                            view = inflater.inflate(R.layout.on_road_driver,null);
-                            view.setBackgroundResource(R.drawable.icon_info_background);
-                            userName = (TextView)view.findViewById(R.id.onroad_passenger_name);
-                            userTel  = (TextView)view.findViewById(R.id.onroad_passenger_tel);
-                            startToEnd = (TextView)view.findViewById(R.id.onroad_passenger_startToEnd);
-                            startTime = (TextView)view.findViewById(R.id.onroad_passenger_starttime);
-                            endTime = (TextView)view.findViewById(R.id.onroad_passenger_endtime);
-                            moneyBefore = (TextView)view.findViewById(R.id.onroad_passenger_moneybefore);
-                            moneyAfter = (TextView)view.findViewById(R.id.onroad_passenger_moneyafter);
-                            carNum = (TextView)view.findViewById(R.id.onroad_passenger_carNum);
-                            toChat = (Button)view.findViewById(R.id.onroad_passenger_chat);
-                            cancel = (Button)view.findViewById(R.id.onroad_passenger_cancel);
-                            toCall = (Button)view.findViewById(R.id.onroad_passenger_call);
-                            toChat.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    startActivity(new Intent(Passenger.this,Chatting.class));
-                                }
-                            });
-
-                            userName.setText(onRoadPassengers.get(i).getString("name"));
-                            userTel.setText(onRoadPassengers.get(i).getString("userid"));
-                            startToEnd.setText(onRoadPassengers.get(i).getString("startplace")+"---->"+onRoadPassengers.get(i).getString("destination"));
-                            startTime.setText(onRoadPassengers.get(i).getString("startdate"));
-                            endTime.setText(onRoadPassengers.get(i).getString("enddate"));
-                            moneyBefore.setText(onRoadPassengers.get(i).getString("spendMoney")+"元");
-                            moneyAfter.setText(onRoadPassengers.get(i).getString("sharingMoney")+"元");
-                            carNum.setText(onRoadPassengers.get(i).getString("carnum"));
-                            final String telephoneNumber = userTel.getText().toString();
-                            toCall.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+telephoneNumber)));
-                                }
-                            });
-                            final AlertDialog dialog = new AlertDialog.Builder(getApplicationContext())
-                                    .setTitle("乘客信息")
-                                    .setView(view)
-                                    .create();
-                            dialog.setTitle("用户乘客");
-                            dialog.setCanceledOnTouchOutside(false);
-                            dialog.show();
-                            cancel.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    dialog.dismiss();
-                                }
-                            });
-                        }else {
-                            view = inflater.inflate(R.layout.on_road_pandd,null);
-                            view.setBackgroundResource(R.drawable.icon_info_background);
-                            userName = (TextView)view.findViewById(R.id.onroad_passenger_name);
-                            userTel  = (TextView)view.findViewById(R.id.onroad_passenger_tel);
-                            startToEnd = (TextView)view.findViewById(R.id.onroad_passenger_startToEnd);
-                            startTime = (TextView)view.findViewById(R.id.onroad_passenger_starttime);
-                            endTime = (TextView)view.findViewById(R.id.onroad_passenger_endtime);
-                            moneyBefore = (TextView)view.findViewById(R.id.onroad_passenger_moneybefore);
-                            moneyAfter = (TextView)view.findViewById(R.id.onroad_passenger_moneyafter);
-                            toChat = (Button)view.findViewById(R.id.onroad_passenger_chat);
-                            cancel = (Button)view.findViewById(R.id.onroad_passenger_cancel);
-                            toCall = (Button)view.findViewById(R.id.onroad_passenger_call);
-                            toChat.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    startActivity(new Intent(Passenger.this,Chatting.class));
-                                }
-                            });
-                            userName.setText(onRoadPassengers.get(i).getString("name"));
-                            userTel.setText(onRoadPassengers.get(i).getString("userid"));
-                            startToEnd.setText(onRoadPassengers.get(i).getString("startplace")+"---->"+onRoadPassengers.get(i).getString("destination"));
-                            startTime.setText(onRoadPassengers.get(i).getString("startdate"));
-                            endTime.setText(onRoadPassengers.get(i).getString("enddate"));
-                            moneyBefore.setText(onRoadPassengers.get(i).getString("spendMoney")+"元");
-                            moneyAfter.setText(onRoadPassengers.get(i).getString("sharingMoney")+"元");
-                            final String telephoneNumber = userTel.getText().toString();
-                            toCall.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    startActivity(new Intent(Intent.ACTION_DIAL,Uri.parse("tel:"+telephoneNumber)));
-                                }
-                            });
-                            final AlertDialog dialog = new AlertDialog.Builder(getApplicationContext())
-                                    .setTitle("用户信息")
-                                    .setView(view)
-                                    .create();
-                            dialog.setTitle("附近乘客");
-                            dialog.setCanceledOnTouchOutside(false);
-                            dialog.show();
-                            cancel.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    dialog.dismiss();
-                                }
-                            });
+            int i = marker.getExtraInfo().getInt("Number");
+            try{
+                if(onRoadPassengers.get(i).getString("supplycar").equals("1")){
+                    view = inflater.inflate(R.layout.on_road_driver,null);
+                    view.setBackgroundResource(R.drawable.icon_info_background);
+                    userName = (TextView)view.findViewById(R.id.onroad_passenger_name);
+                    userTel  = (TextView)view.findViewById(R.id.onroad_passenger_tel);
+                    startToEnd = (TextView)view.findViewById(R.id.onroad_passenger_startToEnd);
+                    startTime = (TextView)view.findViewById(R.id.onroad_passenger_starttime);
+                    endTime = (TextView)view.findViewById(R.id.onroad_passenger_endtime);
+                    moneyBefore = (TextView)view.findViewById(R.id.onroad_passenger_moneybefore);
+                    moneyAfter = (TextView)view.findViewById(R.id.onroad_passenger_moneyafter);
+                    carNum = (TextView)view.findViewById(R.id.onroad_passenger_carNum);
+                    toChat = (Button)view.findViewById(R.id.onroad_passenger_chat);
+                    cancel = (Button)view.findViewById(R.id.onroad_passenger_cancel);
+                    toCall = (Button)view.findViewById(R.id.onroad_passenger_call);
+                    SharedPreferences.Editor editor = getSharedPreferences("Setting",MODE_MULTI_PROCESS).edit();
+                    editor.putString("destinationTel",userTel.getText().toString());
+                    editor.commit();
+                    Log.d("对方账号是",userTel.getText().toString());
+                    toChat.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(Passenger.this,Chatting.class);
+                            startActivity(intent);
                         }
+                    });
 
-                    }catch (Exception e){
+                    userName.setText(onRoadPassengers.get(i).getString("name"));
+                    userTel.setText(onRoadPassengers.get(i).getString("userid"));
+                    startToEnd.setText(onRoadPassengers.get(i).getString("startplace")+"---->"+onRoadPassengers.get(i).getString("destination"));
+                    startTime.setText(onRoadPassengers.get(i).getString("startdate"));
+                    endTime.setText(onRoadPassengers.get(i).getString("enddate"));
+                    moneyBefore.setText(onRoadPassengers.get(i).getString("spendMoney")+"元");
+                    moneyAfter.setText(onRoadPassengers.get(i).getString("sharingMoney")+"元");
+                    carNum.setText(onRoadPassengers.get(i).getString("carnum"));
 
-                    }
+                    final String telephoneNumber = userTel.getText().toString();
+                    toCall.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+telephoneNumber)));
+                        }
+                    });
+                    final AlertDialog dialog = new AlertDialog.Builder(Passenger.this)
+                            .setTitle("乘客信息")
+                            .setView(view)
+                            .create();
+                    dialog.setTitle("用户乘客");
+                    dialog.setCanceledOnTouchOutside(false);
+                    dialog.show();
+                    cancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dialog.dismiss();
+                        }
+                    });
+                    Toast.makeText(getApplicationContext(),"司机",Toast.LENGTH_SHORT).show();
+                }else {
+                    view = inflater.inflate(R.layout.on_road_pandd,null);
+                    view.setBackgroundResource(R.drawable.icon_info_background);
+                    userName = (TextView)view.findViewById(R.id.onroad_passenger_name);
+                    userTel  = (TextView)view.findViewById(R.id.onroad_passenger_tel);
+                    startToEnd = (TextView)view.findViewById(R.id.onroad_passenger_startToEnd);
+                    startTime = (TextView)view.findViewById(R.id.onroad_passenger_starttime);
+                    endTime = (TextView)view.findViewById(R.id.onroad_passenger_endtime);
+                    moneyBefore = (TextView)view.findViewById(R.id.onroad_passenger_moneybefore);
+                    moneyAfter = (TextView)view.findViewById(R.id.onroad_passenger_moneyafter);
+                    toChat = (Button)view.findViewById(R.id.onroad_passenger_chat);
+                    cancel = (Button)view.findViewById(R.id.onroad_passenger_cancel);
+                    toCall = (Button)view.findViewById(R.id.onroad_passenger_call);
+                    toChat.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            startActivity(new Intent(Passenger.this,Chatting.class));
+                        }
+                    });
+                    userName.setText(onRoadPassengers.get(i).getString("name"));
+                    userTel.setText(onRoadPassengers.get(i).getString("userid"));
+                    startToEnd.setText(onRoadPassengers.get(i).getString("startplace")+"---->"+onRoadPassengers.get(i).getString("destination"));
+                    startTime.setText(onRoadPassengers.get(i).getString("startdate"));
+                    endTime.setText(onRoadPassengers.get(i).getString("enddate"));
+                    moneyBefore.setText(onRoadPassengers.get(i).getString("spendMoney")+"元");
+                    moneyAfter.setText(onRoadPassengers.get(i).getString("sharingMoney")+"元");
+                    SharedPreferences.Editor editor = getSharedPreferences("Setting",MODE_MULTI_PROCESS).edit();
+                    editor.putString("destinationTel",userTel.getText().toString());
+                    editor.commit();
+                    Log.d("对方账号是",userTel.getText().toString());
+                    final String telephoneNumber = userTel.getText().toString();
+                    toCall.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            startActivity(new Intent(Intent.ACTION_DIAL,Uri.parse("tel:"+telephoneNumber)));
+                        }
+                    });
+                    final AlertDialog dialog = new AlertDialog.Builder(Passenger.this)
+                            .setTitle("用户信息")
+                            .setView(view)
+                            .create();
+                    dialog.setTitle("附近乘客");
+                    dialog.setCanceledOnTouchOutside(false);
+                    dialog.show();
+                    cancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dialog.dismiss();
+                        }
+                    });
                 }
+
+            }catch (Exception e){
+                Toast.makeText(getApplicationContext(),"出问题了",Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
             }
             return true;
-        }
-    }
-    private class MapClickerListener implements BaiduMap.OnMapClickListener{
-
-        @Override
-        public void onMapClick(LatLng latLng) {
-            baiduMap.hideInfoWindow();
-        }
-        @Override
-        public boolean onMapPoiClick(MapPoi mapPoi) {
-            Toast.makeText(Passenger.this,mapPoi.getName(),Toast.LENGTH_SHORT).show();
-            return false;
         }
     }
     private class MapLongClickerListener implements BaiduMap.OnMapLongClickListener {

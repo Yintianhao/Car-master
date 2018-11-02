@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.MultiAutoCompleteTextView;
 import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
@@ -43,6 +44,7 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatting);
+        signUp();
         initEvents();
         addListener();
     }
@@ -52,27 +54,32 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
     }
 
     public void signUp(){
-        EMClient.getInstance().login(Const.userName,
-                Const.passWord,
+        String tel = getSharedPreferences("Setting", MODE_MULTI_PROCESS).getString("user","");
+        String passWord = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("passWord","");
+        Log.d("用户名---",tel);
+        Log.d("密码---",passWord);
+        EMClient.getInstance().login(tel,
+                passWord,
                 new EMCallBack() {
                     @Override
                     public void onSuccess() {
-                        //
-                        Toast.makeText(getApplicationContext(),"可以跟该用户聊天了",Toast.LENGTH_SHORT).show();
+                        Log.d("登录成功","--");
                     }
 
                     @Override
                     public void onError(int code, String error) {
-
+                        Log.d("登录错误","--");
                     }
 
                     @Override
                     public void onProgress(int progress, String status) {
-
+                        Log.d("正在登录","--");
                     }
                 });
     }
     public void initEvents() {
+        chatId  = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("destinationTel","");
+        Log.d("chatId-----",chatId);
         inputText = (EditText) findViewById(R.id.input_text);
         send = (Button) findViewById(R.id.send);
         msgViewRecyclerView = (RecyclerView) findViewById(R.id.msg_recycler_view);
@@ -83,11 +90,13 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
     }
 
     public void sendMessage(String content,String chatWithId) {
-        EMMessage message = EMMessage.createTxtSendMessage(content,"13657433916");
+        EMMessage message = EMMessage.createTxtSendMessage(content,chatWithId);
 //如果是群聊，设置chattype，默认是单聊
         message.setChatType(EMMessage.ChatType.Chat);
 //发送消息
         EMClient.getInstance().chatManager().sendMessage(message);
+        Log.d("发送内容",content);
+        Log.d("聊天对象",chatWithId);
         message.setMessageStatusCallback(new EMCallBack() {
             @Override
             public void onSuccess() {
@@ -97,6 +106,7 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
 
             @Override
             public void onError(int code, String error) {
+                Log.d("错误代码",String.valueOf(code));
                 Log.d("发送信息失败",error);
                 //Toast.makeText(Chatting.this, "发送信息失败", Toast.LENGTH_SHORT).show();
             }
