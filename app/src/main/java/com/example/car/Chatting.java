@@ -1,7 +1,10 @@
 package com.example.car;
 
 import android.content.Intent;
+import android.icu.text.LocaleDisplayNames;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -40,6 +43,20 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
     private MsgAdapter adapter;
     private String chatId;//自己传进来的跟自己聊天的人的ID
 
+    private Handler UIHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg){
+            switch (msg.what){
+                default:break;
+                case 1:
+                    adapter.notifyItemInserted(msgList.size() - 1);
+                    adapter.notifyDataSetChanged();
+                    msgViewRecyclerView.scrollToPosition(msgList.size() - 1);
+                    Log.d("Handler","消息更新");
+                    break;
+            }
+        }
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +70,25 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
         send.setOnClickListener(this);
     }
 
+    public void signDown(){
+        EMClient.getInstance().logout(false, new EMCallBack() {
+            @Override
+            public void onSuccess() {
+                Log.d("退出登录成功","--");
+            }
+
+            @Override
+            public void onError(int code, String error) {
+                Log.d("退出登录代码",code+"");
+                Log.d("错误内容",error);
+            }
+
+            @Override
+            public void onProgress(int progress, String status) {
+
+            }
+        });
+    }
     public void signUp(){
         String tel = getSharedPreferences("Setting", MODE_MULTI_PROCESS).getString("user","");
         String passWord = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("passWord","");
@@ -69,6 +105,8 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
                     @Override
                     public void onError(int code, String error) {
                         Log.d("登录错误","--");
+                        Log.d("code = ",code+"");
+                        Log.d("error = ",error);
                     }
 
                     @Override
@@ -78,7 +116,7 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
                 });
     }
     public void initEvents() {
-        chatId  = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("destinationTel","");
+        chatId  = getIntent().getStringExtra("destinationTel");
         Log.d("chatId-----",chatId);
         inputText = (EditText) findViewById(R.id.input_text);
         send = (Button) findViewById(R.id.send);
@@ -149,9 +187,9 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
             //Toast.makeText(getApplicationContext(), content, Toast.LENGTH_SHORT).show();
             Log.d("size="+messages.size(),"回复的信息"+content);
         }
-        adapter.notifyItemInserted(msgList.size() - 1);
-        adapter.notifyDataSetChanged();
-        msgViewRecyclerView.scrollToPosition(msgList.size() - 1);
+        Message message = new Message();
+        message.what = 1;
+        UIHandler.sendMessage(message);
 
     }
 
@@ -186,4 +224,15 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
         super.onStop();
         EMClient.getInstance().chatManager().removeMessageListener(this);
     }
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+
+    }
+    @Override
+    public void onBackPressed(){
+        super.onBackPressed();
+        signDown();
+    }
+
 }
