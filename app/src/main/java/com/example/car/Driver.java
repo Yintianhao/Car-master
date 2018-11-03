@@ -10,6 +10,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -45,6 +47,7 @@ import com.amap.api.navi.AmapNaviParams;
 import com.amap.api.navi.AmapNaviType;
 import com.amap.api.navi.INaviInfoCallback;
 import com.amap.api.navi.model.AMapNaviLocation;
+import com.amap.api.navi.model.NaviLatLng;
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -95,6 +98,9 @@ import com.baidu.mapapi.search.route.RoutePlanSearch;
 import com.baidu.mapapi.search.route.TransitRouteResult;
 import com.baidu.mapapi.search.route.WalkingRouteResult;
 import com.google.gson.JsonIOException;
+import com.hyphenate.EMCallBack;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -126,7 +132,7 @@ public class Driver extends AppCompatActivity {
     // 声明LocationClient类
     LocationClient location = null;
     //获取位置监听
-    Driver.MyLocationListener listener = null;
+    MyLocationListener listener = null;
     PoiSearch poiSearch;//poi检索实例
     PoiCitySearchOption poiCitySearchOption;//信息
     AutoCompleteTextView searchByInput;//输入内容
@@ -158,16 +164,35 @@ public class Driver extends AppCompatActivity {
     FloatingActionButton setTraffic;
     List<Boolean> isTraffic;
     int clickNum = 0;
+
+    private Handler handler = new Handler(){
+      @Override
+      public void handleMessage(Message msg){
+          switch (msg.what){
+              case 3:
+                  Toast.makeText(Driver.this,"发送对象"+msg.getData().getString("data"),Toast.LENGTH_SHORT).show();
+                  break;
+              case 1:
+                  Toast.makeText(Driver.this,"信息发送成功",Toast.LENGTH_SHORT).show();
+              break;
+              case 2:
+                  Toast.makeText(Driver.this,"信息发送失败"+msg.getData().getString("data"),Toast.LENGTH_SHORT).show();
+                  break;
+          }
+      }
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver);
+        signUp();
         initDrawerLayout();//初始化控件
         //initRecyclerView();
         addListener();//添加监听器
         isAndroidSix();//判断安卓的版本
         //initMyTestLocation();
     }
+
     public void initRecyclerView(){
         inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         linearLayout = (LinearLayout) inflater.inflate(R.layout.nearby_passenger_list, null);
@@ -177,6 +202,7 @@ public class Driver extends AppCompatActivity {
         matchAdapter = new NearbyPassengerAdapter(setOfNearByPassenger);
         recyclerView.setAdapter(matchAdapter);
     }
+
     public void initDrawerLayout(){
         //initLocation();
         latestLocationInfo = (TextView) findViewById(R.id.driver_locationInfo);
@@ -224,6 +250,7 @@ public class Driver extends AppCompatActivity {
         isTraffic.add(false);
         isTraffic.add(true);
     }
+
     public void addListener(){
         //悬浮按钮监听
         go.setOnClickListener(new ViewClickListener());
@@ -245,6 +272,7 @@ public class Driver extends AppCompatActivity {
         baiduMap.setOnMapClickListener(new MapClickListener());
         setTraffic.setOnClickListener(new ViewClickListener());
     }
+
     public void isAndroidSix(){
         //初始化经纬度以及详细地址，判断是否为android6.0系统版本，如果是，需要动态添加权限
         if (Build.VERSION.SDK_INT>=23){
@@ -253,6 +281,7 @@ public class Driver extends AppCompatActivity {
             initLocation();//init为定位方法
         }
     }
+
     public void initLocation(){
         latestLocationInfo = (TextView) findViewById(R.id.driver_locationInfo);
         location = new LocationClient(getApplicationContext());
@@ -261,12 +290,14 @@ public class Driver extends AppCompatActivity {
         setViews();
         location.start();
     }
+
     public void addSearch(){
         //根据城市名和key搜索
         poiCitySearchOption = new PoiCitySearchOption();
         poiCitySearchOption.city("湘潭市").keyword(searchByInput.getText().toString()).pageNum(0).pageCapacity(10);
         poiSearch.searchInCity(poiCitySearchOption);
     }
+
     public void setViews() {
         LocationClientOption option = new LocationClientOption();
         option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);//可选，默认高精度，设置定位模式，高精度，低功耗，仅设备
@@ -282,6 +313,7 @@ public class Driver extends AppCompatActivity {
         option.SetIgnoreCacheException(false);//可选，默认false，设置是否收集CRASH信息，默认收集
         location.setLocOption(option);
     }
+
     public void showContacts(){
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED
@@ -295,6 +327,7 @@ public class Driver extends AppCompatActivity {
             initLocation();
         }
     }
+
     public void startGo(LatLng start,LatLng end){
         try{
             PlanNode begin = PlanNode.withLocation(start);
@@ -304,49 +337,85 @@ public class Driver extends AppCompatActivity {
             Toast.makeText(Driver.this,"请点击地图标记终点",Toast.LENGTH_SHORT).show();
         }
     }
+
     public void voiceNavi(LatLng start,LatLng end,List<Poi> wayList) {
         double[] startConverted  = GPSConvert.bd09_To_Gcj02(start.latitude,start.longitude);
         double[] endConverted = GPSConvert.bd09_To_Gcj02(end.latitude,end.longitude);
         Poi startloc = new Poi("当前位置", new com.amap.api.maps.model.LatLng(startConverted[0],startConverted[1]), "");
         Poi endloc = new Poi("目的地", new com.amap.api.maps.model.LatLng(endConverted[0], endConverted[1]), "B000A83M61");
-        AmapNaviPage.getInstance().showRouteActivity(getApplicationContext(), new AmapNaviParams(startloc, wayList, endloc, AmapNaviType.DRIVER), new INaviInfoCallback() {
+        AmapNaviPage.getInstance().showRouteActivity(Driver.this, new AmapNaviParams(startloc, wayList, endloc, AmapNaviType.DRIVER), new INaviInfoCallback() {
             @Override
             public void onInitNaviFailure() {
-                Toast.makeText(getApplicationContext(),"失败",Toast.LENGTH_LONG).show();
+                Toast.makeText(Driver.this,"导航失败,请手动打开GPS权限",Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onGetNavigationText(String s) {
+
             }
 
             @Override
             public void onLocationChange(AMapNaviLocation aMapNaviLocation) {
+                NaviLatLng latLng = aMapNaviLocation.getCoord();
+                double[] lng = GPSConvert.gcj02_To_Bd09(latLng.getLatitude(),latLng.getLongitude());
+                String content = "location,"+String.valueOf(lng[0])+","+String.valueOf(lng[1]);
+                try{
+                    if (onRoadPassengers!=null&&onRoadPassengers.size()!=0){
+                        for (int j = 0;j < onRoadPassengers.size();j++){
+                            String tel = onRoadPassengers.get(j).getString("userid");
+                            sendMessage(content,tel);
+                        }
+                    }
+                }catch (JSONException e){
 
+                }catch (NullPointerException e){
+                    Toast.makeText(getApplicationContext(),"请在地图上选择一个目的地",Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
             public void onArriveDestination(boolean b) {
-
+                //到达目的地
             }
 
             @Override
             public void onStartNavi(int i) {
+                //启动导航
+                try{
+                    if (onRoadPassengers!=null&&onRoadPassengers.size()!=0){
+                        for (int j = 0;j < onRoadPassengers.size();j++){
+                            String tel = onRoadPassengers.get(j).getString("userid");
+                            Log.d("出发发送信息给",tel);
+                            //发送start 表示出发
+                            sendMessage("start",tel);
+                            Message message = new Message();
+                            message.what = 3;
+                            Bundle bundle = new Bundle();
+                            bundle.putString("data",tel);
+                            message.setData(bundle);
+                            handler.sendMessage(message);
+                        }
+                    }
+                }catch (JSONException e){
 
+                }catch (NullPointerException e){
+                    Toast.makeText(getApplicationContext(),"请在地图上选择一个目的地",Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
             public void onCalculateRouteSuccess(int[] ints) {
-
+                //算路成功
             }
 
             @Override
             public void onCalculateRouteFailure(int i) {
-
+                //算路失败
             }
 
             @Override
             public void onStopSpeaking() {
-
+                //停止语音
             }
 
             @Override
@@ -376,7 +445,92 @@ public class Driver extends AppCompatActivity {
 
             @Override
             public void onArrivedWayPoint(int i) {
+                //到达第几个wayPoint
 
+            }
+        });
+    }
+    public void signUp(){
+        String tel = getSharedPreferences("Setting", MODE_MULTI_PROCESS).getString("user","");
+        String passWord = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("passWord","");
+        Log.d("用户名---",tel);
+        Log.d("密码---",passWord);
+        EMClient.getInstance().login(tel,
+                passWord,
+                new EMCallBack() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d("登录成功","--");
+                    }
+
+                    @Override
+                    public void onError(int code, String error) {
+                        Log.d("登录错误","--");
+                        Log.d("code = ",code+"");
+                        Log.d("error = ",error);
+                    }
+
+                    @Override
+                    public void onProgress(int progress, String status) {
+                        Log.d("正在登录","--");
+                    }
+                });
+    }
+    public void signDown(){
+        EMClient.getInstance().logout(false, new EMCallBack() {
+            @Override
+            public void onSuccess() {
+                Log.d("司机退出登录成功","--");
+            }
+
+            @Override
+            public void onError(int code, String error) {
+                Log.d("司机退出登录代码",code+"");
+                Log.d("司机错误内容",error);
+            }
+
+            @Override
+            public void onProgress(int progress, String status) {
+
+            }
+        });
+    }
+    public void sendMessage(String content,String chatWithId) {
+        EMMessage message = EMMessage.createTxtSendMessage(content,chatWithId);
+//如果是群聊，设置chattype，默认是单聊
+        message.setChatType(EMMessage.ChatType.Chat);
+//发送消息
+        EMClient.getInstance().chatManager().sendMessage(message);
+        Log.d("发送内容",content);
+        Log.d("聊天对象",chatWithId);
+        message.setMessageStatusCallback(new EMCallBack() {
+            @Override
+            public void onSuccess() {
+                Log.d("司机发送信息成功","发送信息成功");
+                //Toast.makeText(Chatting.this, "发送信息成功", Toast.LENGTH_SHORT).show();
+                Message message = new Message();
+                message.what = 1;
+                handler.sendMessage(message);
+            }
+
+            @Override
+            public void onError(int code, String error) {
+
+                Log.d("司机错误代码",String.valueOf(code));
+                Log.d("司机发送信息失败",error);
+                Message message = new Message();
+                message.what = 2;
+                Bundle bundle = new Bundle();
+                bundle.putString("error",code+error);
+                message.setData(bundle);
+                handler.sendMessage(message);
+                //Toast.makeText(Chatting.this, "发送信息失败", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onProgress(int progress, String status) {
+                //Toast.makeText(Chatting.this, "发送信息中"+status, Toast.LENGTH_SHORT).show();
+                Log.d("司机发送信息中",status);
             }
         });
     }
@@ -706,6 +860,7 @@ public class Driver extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        signDown();//退出登录
         if(poiSearch!=null){
             poiSearch.destroy();
         }
@@ -994,11 +1149,6 @@ public class Driver extends AppCompatActivity {
                     startGo(start,markerLocation);
                     voiceNavi(start,markerLocation,new ArrayList<Poi>());
                     break;
-                case R.id.onroad_passenger_chat:
-                    baiduMap.hideInfoWindow();
-                    Intent intent = new Intent(Driver.this,Chatting.class);
-                    startActivity(intent);
-                    break;
                 case R.id.driver_onRoadPassenger:
                     try {
                         getRoadNearbyCar(getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("user",""),String.valueOf(start.latitude),String.valueOf(start.longitude),String.valueOf(end.latitude),String.valueOf(end.longitude),"2018-09-02-9-00-00","2018-09-02-9-00-30");
@@ -1068,15 +1218,19 @@ public class Driver extends AppCompatActivity {
                     startToEnd.setText(onRoadPassengers.get(i).getString("startplace")+"---->"+onRoadPassengers.get(i).getString("destination"));
                     startTime.setText(onRoadPassengers.get(i).getString("startdate"));
                     endTime.setText(onRoadPassengers.get(i).getString("enddate"));
-                    final String telephoneNumber = userTel.getText().toString();
-                    SharedPreferences.Editor editor = getSharedPreferences("Setting",MODE_MULTI_PROCESS).edit();
-                    editor.putString("destinationTel",userTel.getText().toString());
-                    editor.commit();
+                    final String telephoneNumber = onRoadPassengers.get(i).getString("userid");
                     Log.d("对方账号是",userTel.getText().toString());
                     toCall.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+telephoneNumber)));
+                        }
+                    });
+                    toChat.setOnClickListener(new View.OnClickListener(){
+                        @Override
+                        public void onClick(View v){
+                            Intent intent = new Intent(Driver.this,Chatting.class);
+                            intent.putExtra("destinationTel",telephoneNumber);
                         }
                     });
                     final AlertDialog dialog = new AlertDialog.Builder(Driver.this)

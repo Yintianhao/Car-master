@@ -10,6 +10,8 @@ import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -57,6 +59,7 @@ import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
+import com.baidu.mapapi.map.Overlay;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.Polyline;
 import com.baidu.mapapi.map.PolylineOptions;
@@ -84,6 +87,11 @@ import com.baidu.mapapi.search.route.PlanNode;
 import com.baidu.mapapi.search.route.RoutePlanSearch;
 import com.baidu.mapapi.search.route.TransitRouteResult;
 import com.baidu.mapapi.search.route.WalkingRouteResult;
+import com.hyphenate.EMCallBack;
+import com.hyphenate.EMMessageListener;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMMessage;
+import com.hyphenate.chat.EMTextMessageBody;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -101,7 +109,7 @@ import WheelView.Adapter.NumericWheelAdapter;
 import WheelView.WheelView;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class Passenger extends AppCompatActivity{
+public class Passenger extends AppCompatActivity {
 
     MapView mapView;//地图视图
     BaiduMap baiduMap;//地图实例
@@ -141,15 +149,30 @@ public class Passenger extends AppCompatActivity{
     LinearLayout parent;
     LocationClient location = null;
     MyLocationListener listener;
+
+    private Handler UIHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg){
+            switch (msg.what){
+                default:break;
+                case 1:
+                    Toast.makeText(Passenger.this,"司机已经接单并前往",Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_passenger);
+        signUp();
         initActivityEvents();
         initLocation();
         isAndroidSix();
         initDialogEvents();
         addListener();//添加监听器
+        MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(new LatLng(27.899096,112.923213));
+        baiduMap.animateMapStatus(update);
     }
     public void isAndroidSix(){
         //初始化经纬度以及详细地址，判断是否为android6.0系统版本，如果是，需要动态添加权限
@@ -542,6 +565,51 @@ public class Passenger extends AppCompatActivity{
             Toast.makeText(Passenger.this,"请点击地图标记终点",Toast.LENGTH_SHORT).show();
         }
     }
+    public void signDown(){
+        EMClient.getInstance().logout(false, new EMCallBack() {
+            @Override
+            public void onSuccess() {
+                Log.d("退出登录成功","--");
+            }
+
+            @Override
+            public void onError(int code, String error) {
+                Log.d("退出登录代码",code+"");
+                Log.d("错误内容",error);
+            }
+
+            @Override
+            public void onProgress(int progress, String status) {
+
+            }
+        });
+    }
+    public void signUp(){
+        String tel = getSharedPreferences("Setting", MODE_MULTI_PROCESS).getString("user","");
+        String passWord = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("passWord","");
+        Log.d("用户名---",tel);
+        Log.d("密码---",passWord);
+        EMClient.getInstance().login(tel,
+                passWord,
+                new EMCallBack() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d("登录成功","--");
+                    }
+
+                    @Override
+                    public void onError(int code, String error) {
+                        Log.d("登录错误","--");
+                        Log.d("code = ",code+"");
+                        Log.d("error = ",error);
+                    }
+
+                    @Override
+                    public void onProgress(int progress, String status) {
+                        Log.d("正在登录","--");
+                    }
+                });
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         switch (item.getItemId()){
@@ -554,12 +622,25 @@ public class Passenger extends AppCompatActivity{
         return true;
     }
     @Override
+    public void onResume(){
+        super.onResume();
+        EMClient.getInstance().chatManager().addMessageListener(new MessageListener());
+    }
+    @Override
     public void onBackPressed() {
         super.onBackPressed();
+        signDown();
+        EMClient.getInstance().chatManager().removeMessageListener(new MessageListener());
+    }
+    public void onStop(){
+        super.onStop();
+        EMClient.getInstance().chatManager().removeMessageListener(new MessageListener());
     }
     @Override
     public void onDestroy() {
         super.onDestroy();
+        signDown();
+        EMClient.getInstance().chatManager().removeMessageListener(new MessageListener());
         if(routePlanSearch!=null){
             routePlanSearch.destroy();
         }
@@ -582,10 +663,12 @@ public class Passenger extends AppCompatActivity{
                 ,drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().get(j).longitude);
                 linePoints.add(node);//将点添加到集合上
             }
-            OverlayOptions ooPolyLine = new PolylineOptions().width(5).color(color[(int)(Math.random()*10)]).points(linePoints);//设置折线的属性,颜色等
+            OverlayOptions ooPolyLine = new PolylineOptions().width(15).color(Color.YELLOW).points(linePoints);//设置折线的属性,颜色等
             Polyline polyline = (Polyline) baiduMap.addOverlay(ooPolyLine);//添加到地图
         }
     }
+
+
 
     static class MyStringRequest extends StringRequest {
 
@@ -713,6 +796,7 @@ public class Passenger extends AppCompatActivity{
                         + location.getStreet()
                         + location.getStreetNumber());
             }
+
         }
     }
     private class ViewClickListener implements View.OnClickListener{
@@ -784,41 +868,15 @@ public class Passenger extends AppCompatActivity{
             }
         }
     }
-    private class LocationListener implements android.location.LocationListener{
-
-        @Override
-        public void onLocationChanged(Location location) {
-            //实时对位置进行监听并更新位置
-            GeoCoder geoCoder = GeoCoder.newInstance();
-            geoCoder.setOnGetGeoCodeResultListener(new GeoCoderResultListener());
-            LatLng center = new LatLng(location.getLatitude(),location.getLongitude());
-            geoCoder.reverseGeoCode(new ReverseGeoCodeOption().location(center));
-            MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(center);
-            baiduMap.animateMapStatus(update);
-            MarkerOptions options = new MarkerOptions().position(center).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_mylocation));
-            myLocationOption = options;
-            baiduMap.clear();
-            baiduMap.addOverlay(options);
-        }
-        @Override
-        public void onStatusChanged(String s, int i, Bundle bundle) {
-        }
-        @Override
-        public void onProviderEnabled(String s) {
-        }
-        @Override
-        public void onProviderDisabled(String s) {
-        }
-    }
     private class MarkerClickerListener implements BaiduMap.OnMarkerClickListener{
 
         @Override
         public boolean onMarkerClick(Marker marker) {
             Toast.makeText(getApplicationContext(),"标记监听",Toast.LENGTH_SHORT).show();
-            LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+            final LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
             View view = inflater.inflate(R.layout.on_road_pandd, null);
             view.setBackgroundResource(R.drawable.icon_info_background);
-            TextView userName;
+            final TextView userName;
             TextView userTel;
             TextView startToEnd;
             TextView startTime;
@@ -829,8 +887,8 @@ public class Passenger extends AppCompatActivity{
             Button toChat;
             Button cancel;
             Button toCall;
-            int i = marker.getExtraInfo().getInt("Number");
             try{
+                int i = marker.getExtraInfo().getInt("Number");
                 if(onRoadPassengers.get(i).getString("supplycar").equals("1")){
                     view = inflater.inflate(R.layout.on_road_driver,null);
                     view.setBackgroundResource(R.drawable.icon_info_background);
@@ -845,14 +903,14 @@ public class Passenger extends AppCompatActivity{
                     toChat = (Button)view.findViewById(R.id.onroad_passenger_chat);
                     cancel = (Button)view.findViewById(R.id.onroad_passenger_cancel);
                     toCall = (Button)view.findViewById(R.id.onroad_passenger_call);
-                    SharedPreferences.Editor editor = getSharedPreferences("Setting",MODE_MULTI_PROCESS).edit();
-                    editor.putString("destinationTel",userTel.getText().toString());
-                    editor.commit();
+
+                    final String destination = onRoadPassengers.get(i).getString("userid");
                     Log.d("对方账号是",userTel.getText().toString());
                     toChat.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             Intent intent = new Intent(Passenger.this,Chatting.class);
+                            intent.putExtra("destinationTel",destination);
                             startActivity(intent);
                         }
                     });
@@ -900,10 +958,13 @@ public class Passenger extends AppCompatActivity{
                     toChat = (Button)view.findViewById(R.id.onroad_passenger_chat);
                     cancel = (Button)view.findViewById(R.id.onroad_passenger_cancel);
                     toCall = (Button)view.findViewById(R.id.onroad_passenger_call);
+                    final String destination = onRoadPassengers.get(i).getString("userid");
                     toChat.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            startActivity(new Intent(Passenger.this,Chatting.class));
+                            Intent intent = new Intent(Passenger.this,Chatting.class);
+                            intent.putExtra("destinationTel",destination);
+                            startActivity(intent);
                         }
                     });
                     userName.setText(onRoadPassengers.get(i).getString("name"));
@@ -913,10 +974,8 @@ public class Passenger extends AppCompatActivity{
                     endTime.setText(onRoadPassengers.get(i).getString("enddate"));
                     moneyBefore.setText(onRoadPassengers.get(i).getString("spendMoney")+"元");
                     moneyAfter.setText(onRoadPassengers.get(i).getString("sharingMoney")+"元");
-                    SharedPreferences.Editor editor = getSharedPreferences("Setting",MODE_MULTI_PROCESS).edit();
-                    editor.putString("destinationTel",userTel.getText().toString());
-                    editor.commit();
-                    Log.d("对方账号是",userTel.getText().toString());
+
+                    Log.d("对方账号是",destination);
                     final String telephoneNumber = userTel.getText().toString();
                     toCall.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -988,5 +1047,57 @@ public class Passenger extends AppCompatActivity{
             return true;
         }
     }
+    private class MessageListener implements  EMMessageListener{
 
+        @Override
+        public void onMessageReceived(List<EMMessage> messages) {
+            Log.d("messageListener",".....");
+            for (int i = 0; i < messages.size(); i++) {
+                String content = ((EMTextMessageBody) messages.get(i).getBody()).getMessage();
+                if (content.equals("start")){
+                    Message message = new Message();
+                    message.what = 1;
+                    UIHandler.sendMessage(message);
+                }
+                if (content.split(",")[0].equals("location")){
+                    Double lat = Double.parseDouble(content.split(",")[1]);
+                    Double lng = Double.parseDouble(content.split(",")[2]);
+                    MarkerOptions options = new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.fromResource(R.drawable.look_for_car));
+                    baiduMap.addOverlay(options);
+                    startGo(new LatLng(27.899096,112.923213),new LatLng(lat,lng),new ArrayList<PlanNode>());
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            baiduMap.clear();
+                            try{
+                                Thread.sleep(3000);
+                            }catch (InterruptedException e){
+
+                            }
+                        }
+                    }).start();
+                }
+            }
+        }
+
+        @Override
+        public void onCmdMessageReceived(List<EMMessage> messages) {
+
+        }
+
+        @Override
+        public void onMessageRead(List<EMMessage> messages) {
+
+        }
+
+        @Override
+        public void onMessageDelivered(List<EMMessage> messages) {
+
+        }
+
+        @Override
+        public void onMessageChanged(EMMessage message, Object change) {
+
+        }
+    }
 }
