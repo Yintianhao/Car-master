@@ -61,6 +61,7 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatting);
+        Log.d("进入chatting","activity");
         signUp();
         initEvents();
         addListener();
@@ -185,6 +186,7 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
             String content = ((EMTextMessageBody) messages.get(i).getBody()).getMessage();
             msgList.add(new Msg(content, Msg.TYPE_RECIEVED));
             //Toast.makeText(getApplicationContext(), content, Toast.LENGTH_SHORT).show();
+            Log.d("进入chatting","messageListener");
             Log.d("size="+messages.size(),"回复的信息"+content);
         }
         Message message = new Message();
@@ -227,12 +229,13 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
     @Override
     public void onDestroy(){
         super.onDestroy();
-
+        EMClient.getInstance().chatManager().removeMessageListener(this);
     }
     @Override
     public void onBackPressed(){
         super.onBackPressed();
         signDown();
+        EMClient.getInstance().chatManager().removeMessageListener(this);
     }
 
 }

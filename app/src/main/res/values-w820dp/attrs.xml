@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <declare-styleable name="MyRatingBar">
+        <attr name="space_width" format="dimension"></attr>
+        <attr name="star_width" format="dimension"></attr>
+        <attr name="star_height" format="dimension"></attr>
+        <attr name="star_max" format="integer"></attr>
+        <attr name="star_rating" format="float"></attr>
+        <attr name="star_hollow" format="reference"></attr>
+        <attr name="star_solid" format="reference"></attr>
+        <attr name="star_isIndicator" format="boolean"></attr>
+        <attr name="star_orientation" format="integer"></attr>
+    </declare-styleable>
+</resources>

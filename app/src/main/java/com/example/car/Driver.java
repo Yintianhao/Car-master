@@ -169,14 +169,18 @@ public class Driver extends AppCompatActivity {
       @Override
       public void handleMessage(Message msg){
           switch (msg.what){
+              case 5:
+                  Toast.makeText(Driver.this,"行程结束,收益会自动到达您的账户上",Toast.LENGTH_SHORT).show();
+              case 4:
+                  Toast.makeText(Driver.this,"到达第"+(msg.arg1+1)+"个乘客附近",Toast.LENGTH_LONG).show();
               case 3:
-                  Toast.makeText(Driver.this,"发送对象"+msg.getData().getString("data"),Toast.LENGTH_SHORT).show();
+                  Toast.makeText(Driver.this,"正在将位置发给手机号为"+msg.getData().getString("data")+"的乘客",Toast.LENGTH_SHORT).show();
                   break;
               case 1:
-                  Toast.makeText(Driver.this,"信息发送成功",Toast.LENGTH_SHORT).show();
-              break;
+                  Toast.makeText(Driver.this,"已通知各个顺路乘客",Toast.LENGTH_SHORT).show();
+                  break;
               case 2:
-                  Toast.makeText(Driver.this,"信息发送失败"+msg.getData().getString("data"),Toast.LENGTH_SHORT).show();
+                  Toast.makeText(Driver.this,"通知发送失败,请检查手机网络设置"+msg.getData().getString("data"),Toast.LENGTH_SHORT).show();
                   break;
           }
       }
@@ -338,11 +342,17 @@ public class Driver extends AppCompatActivity {
         }
     }
 
+    /*
+    * @param start开始点 end终点 wayList途经点
+    * */
     public void voiceNavi(LatLng start,LatLng end,List<Poi> wayList) {
+        //将百度地图坐标转化为高德地图坐标
         double[] startConverted  = GPSConvert.bd09_To_Gcj02(start.latitude,start.longitude);
         double[] endConverted = GPSConvert.bd09_To_Gcj02(end.latitude,end.longitude);
+        //包装成高德地图的点
         Poi startloc = new Poi("当前位置", new com.amap.api.maps.model.LatLng(startConverted[0],startConverted[1]), "");
         Poi endloc = new Poi("目的地", new com.amap.api.maps.model.LatLng(endConverted[0], endConverted[1]), "B000A83M61");
+        //进入导航界面
         AmapNaviPage.getInstance().showRouteActivity(Driver.this, new AmapNaviParams(startloc, wayList, endloc, AmapNaviType.DRIVER), new INaviInfoCallback() {
             @Override
             public void onInitNaviFailure() {
@@ -351,18 +361,23 @@ public class Driver extends AppCompatActivity {
 
             @Override
             public void onGetNavigationText(String s) {
-
             }
-
+            /*
+            * 位置改变将位置发给乘客
+            * */
             @Override
             public void onLocationChange(AMapNaviLocation aMapNaviLocation) {
+                //高德地图转百度地图坐标
                 NaviLatLng latLng = aMapNaviLocation.getCoord();
                 double[] lng = GPSConvert.gcj02_To_Bd09(latLng.getLatitude(),latLng.getLongitude());
+                //标志位location字段,代表位置
                 String content = "location,"+String.valueOf(lng[0])+","+String.valueOf(lng[1]);
                 try{
+                    //这个List代表沿路的乘客
                     if (onRoadPassengers!=null&&onRoadPassengers.size()!=0){
                         for (int j = 0;j < onRoadPassengers.size();j++){
                             String tel = onRoadPassengers.get(j).getString("userid");
+                            //将此信息发给对应的乘客
                             sendMessage(content,tel);
                         }
                     }
@@ -375,7 +390,29 @@ public class Driver extends AppCompatActivity {
 
             @Override
             public void onArriveDestination(boolean b) {
-                //到达目的地
+                //到达目的地,达到司机终点
+                boolean onArrive = false;
+                try{
+                    //这个List代表沿路的乘客
+                    if (onRoadPassengers!=null&&onRoadPassengers.size()!=0){
+                        for (int j = 0;j < onRoadPassengers.size();j++){
+                            String tel = onRoadPassengers.get(j).getString("userid");
+                            //将此信息发给对应的乘客
+                            String content = "arrive,"+String.valueOf(onRoadPassengers.get(j).getString("sharingMoney"));
+                            sendMessage(content,tel);
+                            onArrive = true;
+                        }
+                    }
+                }catch (JSONException e){
+
+                }catch (NullPointerException e){
+                    Log.d("司机","没有接乘客");
+                }
+                if(onArrive){
+                    Message message = new Message();
+                    message.what = 5;
+                    handler.sendMessage(message);
+                }
             }
 
             @Override
@@ -425,7 +462,24 @@ public class Driver extends AppCompatActivity {
 
             @Override
             public void onExitPage(int i) {
+               /* try{
+                    //这个List代表沿路的乘客
+                    if (onRoadPassengers!=null&&onRoadPassengers.size()!=0){
+                        for (int j = 0;j < onRoadPassengers.size();j++){
+                            String tel = onRoadPassengers.get(j).getString("userid");
+                            //将此信息发给对应的乘客
+                            String content = "arrive,"+String.valueOf(onRoadPassengers.get(j).getString("sharingMoney"));
+                            sendMessage(content,tel);
+                        }
+                    }
+                }catch (JSONException e){
 
+                }catch (NullPointerException e){
+                    Log.d("司机","没有接乘客");
+                }
+                Message message = new Message();
+                message.what = 5;
+                handler.sendMessage(message);*/
             }
 
             @Override
@@ -446,7 +500,10 @@ public class Driver extends AppCompatActivity {
             @Override
             public void onArrivedWayPoint(int i) {
                 //到达第几个wayPoint
-
+                Message message = new Message();
+                message.what = 4;
+                message.arg1 = i;
+                handler.sendMessage(message);
             }
         });
     }
@@ -729,7 +786,7 @@ public class Driver extends AppCompatActivity {
                             if(new JSONObject(response).getJSONArray("result").length()==0){
                                 Toast.makeText(Driver.this,"顺路无车辆信息",Toast.LENGTH_SHORT).show();
                             }else{
-                                Toast.makeText(getApplicationContext(),"目前您顺路有"+new JSONObject(response).getJSONArray("result").length()+"个客人",Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(),"目前您顺路有"+(new JSONObject(response).getJSONArray("result").length()-1)+"个客人",Toast.LENGTH_SHORT).show();
                                 JSONArray jsonArray = new JSONObject(response).getJSONArray("result");
                                 for(int i = 0;i < jsonArray.length();i++){
                                     Bundle bundle = new Bundle();
@@ -1161,9 +1218,9 @@ public class Driver extends AppCompatActivity {
                     List<Poi> wayList = new ArrayList();//途径点目前最多支持3个。
                     try{
                         if (onRoadPassengers!=null&&onRoadPassengers.size()!=0){
-                            wayList.add(MyPoi.getTransforPoi(onRoadPassengers.get(0)));
                             wayList.add(MyPoi.getTransforPoi(onRoadPassengers.get(1)));
                             wayList.add(MyPoi.getTransforPoi(onRoadPassengers.get(2)));
+                            wayList.add(MyPoi.getTransforPoi(onRoadPassengers.get(3)));
                         }
                         voiceNavi(start,end,wayList);
                     }catch (JSONException e){

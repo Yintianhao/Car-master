@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -32,7 +31,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,13 +51,11 @@ import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
-import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
-import com.baidu.mapapi.map.Overlay;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.Polyline;
 import com.baidu.mapapi.map.PolylineOptions;
@@ -67,9 +63,7 @@ import com.baidu.mapapi.map.UiSettings;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.search.core.SearchResult;
 import com.baidu.mapapi.search.geocode.GeoCodeResult;
-import com.baidu.mapapi.search.geocode.GeoCoder;
 import com.baidu.mapapi.search.geocode.OnGetGeoCoderResultListener;
-import com.baidu.mapapi.search.geocode.ReverseGeoCodeOption;
 import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 import com.baidu.mapapi.search.poi.OnGetPoiSearchResultListener;
 import com.baidu.mapapi.search.poi.PoiCitySearchOption;
@@ -105,9 +99,12 @@ import java.util.List;
 import java.util.Map;
 
 import Tool.Const;
+import Tool.StarBar;
 import WheelView.Adapter.NumericWheelAdapter;
 import WheelView.WheelView;
 import de.hdodenhof.circleimageview.CircleImageView;
+import payUI.PayFragment;
+import payUI.PayPwdView;
 
 public class Passenger extends AppCompatActivity {
 
@@ -118,11 +115,13 @@ public class Passenger extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     String image_path;//侧滑栏头像存取路径
-    TextView nickName;
+    TextView nickName;//昵称
+
     NavigationView navigationView;
     TextView latestLocationInfo;
     MarkerOptions myLocationOption;
     RoutePlanSearch routePlanSearch;
+    //各个控件
     FloatingActionButton inputInformation;
     String startPlace;
     String endPlace;
@@ -150,10 +149,21 @@ public class Passenger extends AppCompatActivity {
     LocationClient location = null;
     MyLocationListener listener;
 
+    //支付布局
+    PayFragment fragment;
+
+    //UI的handle
     private Handler UIHandler = new Handler(){
         @Override
         public void handleMessage(Message msg){
             switch (msg.what){
+                case 3:
+                    Toast.makeText(Passenger.this,"密码错误,请重新输入!",Toast.LENGTH_SHORT).show();
+                    break;
+                case 2:
+                    Toast.makeText(Passenger.this,"完成支付",Toast.LENGTH_LONG).show();
+                    evaluationToDriver();
+                    break;
                 default:break;
                 case 1:
                     Toast.makeText(Passenger.this,"司机已经接单并前往",Toast.LENGTH_SHORT).show();
@@ -174,6 +184,9 @@ public class Passenger extends AppCompatActivity {
         MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(new LatLng(27.899096,112.923213));
         baiduMap.animateMapStatus(update);
     }
+    /*
+    * 判断是否是安卓6.0
+    * */
     public void isAndroidSix(){
         //初始化经纬度以及详细地址，判断是否为android6.0系统版本，如果是，需要动态添加权限
         if (Build.VERSION.SDK_INT>=23){
@@ -182,6 +195,9 @@ public class Passenger extends AppCompatActivity {
             initLocation();//init为定位方法
         }
     }
+    /*
+    * 初始化位置
+    * */
     public void initLocation(){
         //位置监听,将起始位置设置为设备当前位置
         location = new LocationClient(getApplicationContext());
@@ -191,6 +207,9 @@ public class Passenger extends AppCompatActivity {
         location.start();
 
     }
+    /*
+    * 位置监听器相关配置
+    * */
     public void setViews() {
         //相关属性配置
         LocationClientOption option = new LocationClientOption();
@@ -207,6 +226,9 @@ public class Passenger extends AppCompatActivity {
         option.SetIgnoreCacheException(false);//可选，默认false，设置是否收集CRASH信息，默认收集
         location.setLocOption(option);
     }
+    /*
+    * 权限提醒
+    * */
     public void showContacts(){
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED
@@ -220,6 +242,9 @@ public class Passenger extends AppCompatActivity {
             initLocation();
         }
     }
+    /*
+    * 初始化对话框
+    * */
     public void initDialogEvents(){
         //动态加载布局,将Dialog中的各个控件初始化
         inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -239,6 +264,9 @@ public class Passenger extends AppCompatActivity {
         startInput.addTextChangedListener(new MyTextWatcher(startInput));
         endInput.addTextChangedListener(new MyTextWatcher(endInput));
     }
+    /*
+    * 初始化活动
+    * */
     public void initActivityEvents(){
         /*
         * 交通状况和路上乘客集合
@@ -293,6 +321,10 @@ public class Passenger extends AppCompatActivity {
         settings.setOverlookingGesturesEnabled(false);
         settings.setRotateGesturesEnabled(false);
     }
+
+    /**
+     * 添加监听器
+     * */
     public void addListener(){
         //悬浮按钮监听
         inputInformation.setOnClickListener(new ViewClickListener());
@@ -305,7 +337,10 @@ public class Passenger extends AppCompatActivity {
         baiduMap.setOnMapLongClickListener(new MapLongClickerListener());
 
     }
-    public void setOrder(){
+    /**
+     * 弹出请求信息框
+     * */
+    public void setOrderDialog(){
         /*
         * 得到起点终点,起点经纬度,终点经纬度,后台请求
         * */
@@ -346,6 +381,10 @@ public class Passenger extends AppCompatActivity {
                 }).create();
         setTheOrder.show();
     }
+    /*
+    * 是否能提供车
+    * @param supplyCar(是/否)
+    * */
     public String getSupplyCar(String supplyCar){
         /*
         * 是否能够提供车辆
@@ -357,6 +396,10 @@ public class Passenger extends AppCompatActivity {
         }
         return "";
     }
+    /*
+    * 获得格式化的时间
+    * YY--MM--DD--HH--MM--SS
+    * */
     public String getFormatTime(String hour,String minute){
         /*
         *获得格式化的时间,YY-MM-DD-HH-MM
@@ -367,6 +410,9 @@ public class Passenger extends AppCompatActivity {
         int day = c.get(Calendar.DATE);
         return year+"-"+month+"-"+day+"-"+hour+"-"+minute+"-00";
     }
+    /*
+    * 获得发布时间
+    * */
     public String getPublishTime(){
         /*
         * 获得发布订单的时间
@@ -379,6 +425,10 @@ public class Passenger extends AppCompatActivity {
         int minute = c.get(Calendar.MINUTE);
         return String.valueOf(year+"-"+month+"-"+day+"-"+hour+"-"+minute+"-00");
     }
+    /*
+    * 添加请求
+    * @param accountNumber 手机号即账号
+    * */
     public void addRequest(final String accountNumber){
         /*
         * 添加拼车请求
@@ -454,6 +504,9 @@ public class Passenger extends AppCompatActivity {
         //将请求添加到队列中
         requestQueue.add(request);
     }
+    /*
+    * 将匹配到的用户添加到地图上
+    * */
     public void addPeopleToMap(final String accountNumber){
         Toast.makeText(Passenger.this,"正在为你找寻...",Toast.LENGTH_LONG).show();
         /*
@@ -556,6 +609,12 @@ public class Passenger extends AppCompatActivity {
         //将请求添加到队列中
         requestQueue.add(request);
     }
+    /*
+    * 开始出发,由终点起点画线
+    * @param start 起点坐标
+    * @param end 终点坐标
+    * @param wayPoints 途径点
+    * */
     public void startGo(LatLng start,LatLng end,List<PlanNode> wayPoints){
         try{
             PlanNode begin = PlanNode.withLocation(start);
@@ -565,6 +624,9 @@ public class Passenger extends AppCompatActivity {
             Toast.makeText(Passenger.this,"请点击地图标记终点",Toast.LENGTH_SHORT).show();
         }
     }
+    /*
+    * 环信退出登录
+    * */
     public void signDown(){
         EMClient.getInstance().logout(false, new EMCallBack() {
             @Override
@@ -584,6 +646,9 @@ public class Passenger extends AppCompatActivity {
             }
         });
     }
+    /*
+    * 环信登录
+    * */
     public void signUp(){
         String tel = getSharedPreferences("Setting", MODE_MULTI_PROCESS).getString("user","");
         String passWord = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("passWord","");
@@ -610,6 +675,60 @@ public class Passenger extends AppCompatActivity {
                     }
                 });
     }
+    /*
+    * 对司机进行评价
+    * */
+    public void evaluationToDriver(){
+        LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+        View view = inflater.inflate(R.layout.evaluation_to_driver, null);
+        StarBar behavior = (StarBar) view.findViewById(R.id.driver_behavior);
+        StarBar environ = (StarBar) view.findViewById(R.id.driver_car_environ);
+        StarBar security = (StarBar) view.findViewById(R.id.driver_security);
+        behavior.setStarRating(1.5f);
+        environ.setStarRating(1.5f);
+        security.setStarRating(1.5f);
+        behavior.setIsIndicator(false);
+        environ.setIsIndicator(false);
+        security.setIsIndicator(false);
+
+        Button summit = (Button) view.findViewById(R.id.summit);
+        final AlertDialog dialog = new AlertDialog.Builder(Passenger.this)
+                .setTitle("请为本次行程打分")
+                .setView(view)
+                .create();
+        dialog.show();
+        summit.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+    }
+    /*
+    * 画路线
+    * */
+    public void drawRouteLine(DrivingRouteResult drivingRouteResult,int routeNum){
+        /*
+         * drivingRouteResult,结果,routeNum,路线编号
+         * */
+        int[] color = {Color.BLACK,Color.BLUE,Color.CYAN,Color.DKGRAY
+                ,Color.GRAY,Color.GREEN,Color.LTGRAY,Color.YELLOW, Color.RED,Color.MAGENTA};//颜色的数组，用来随机选一种颜色表示路线
+        List<LatLng> linePoints = new ArrayList<>();//路线上点的集合
+        //百度地图的一条路线分为路段，getAllStep就是得到一条路线的所有路段，
+        // 然后再一条路段上用getWayPoints路段的点，点一般为转弯处或者交叉路口
+        for(int i = 0; i < drivingRouteResult.getRouteLines().get(routeNum).getAllStep().size();i++){
+            for (int j = 0 ;j < drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().size();j++){
+                LatLng node = new LatLng(drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().get(j).latitude
+                        ,drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().get(j).longitude);
+                linePoints.add(node);//将点添加到集合上
+            }
+            OverlayOptions ooPolyLine = new PolylineOptions().width(15).color(Color.YELLOW).points(linePoints);//设置折线的属性,颜色等
+            Polyline polyline = (Polyline) baiduMap.addOverlay(ooPolyLine);//添加到地图
+        }
+    }
+    /*
+    * 菜单选择
+    * */
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         switch (item.getItemId()){
@@ -632,6 +751,7 @@ public class Passenger extends AppCompatActivity {
         signDown();
         EMClient.getInstance().chatManager().removeMessageListener(new MessageListener());
     }
+    @Override
     public void onStop(){
         super.onStop();
         EMClient.getInstance().chatManager().removeMessageListener(new MessageListener());
@@ -648,28 +768,9 @@ public class Passenger extends AppCompatActivity {
             location.unRegisterLocationListener(listener);
         }
     }
-    public void drawRouteLine(DrivingRouteResult drivingRouteResult,int routeNum){
-        /*
-        * drivingRouteResult,结果,routeNum,路线编号
-        * */
-        int[] color = {Color.BLACK,Color.BLUE,Color.CYAN,Color.DKGRAY
-                ,Color.GRAY,Color.GREEN,Color.LTGRAY,Color.YELLOW, Color.RED,Color.MAGENTA};//颜色的数组，用来随机选一种颜色表示路线
-        List<LatLng> linePoints = new ArrayList<>();//路线上点的集合
-        //百度地图的一条路线分为路段，getAllStep就是得到一条路线的所有路段，
-        // 然后再一条路段上用getWayPoints路段的点，点一般为转弯处或者交叉路口
-        for(int i = 0; i < drivingRouteResult.getRouteLines().get(routeNum).getAllStep().size();i++){
-            for (int j = 0 ;j < drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().size();j++){
-                LatLng node = new LatLng(drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().get(j).latitude
-                ,drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().get(j).longitude);
-                linePoints.add(node);//将点添加到集合上
-            }
-            OverlayOptions ooPolyLine = new PolylineOptions().width(15).color(Color.YELLOW).points(linePoints);//设置折线的属性,颜色等
-            Polyline polyline = (Polyline) baiduMap.addOverlay(ooPolyLine);//添加到地图
-        }
-    }
-
-
-
+    /*
+    * 请求字符串编码转换
+    * */
     static class MyStringRequest extends StringRequest {
 
         public MyStringRequest(int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
@@ -692,6 +793,9 @@ public class Passenger extends AppCompatActivity {
             return Response.success(str, HttpHeaderParser.parseCacheHeaders(response));
         }
     }
+    /*
+    * TextWatcher
+    * */
     private class MyTextWatcher implements TextWatcher,OnGetPoiSearchResultListener,AdapterView.OnItemClickListener{
 
         List<String> searchResult;
@@ -773,6 +877,9 @@ public class Passenger extends AppCompatActivity {
             }
         }
     }
+    /*
+    * 位置监听
+    * */
     private class MyLocationListener implements BDLocationListener {
         /*
         * 如要实现通过GPS定位起点 需要将mapView变为static
@@ -799,6 +906,9 @@ public class Passenger extends AppCompatActivity {
 
         }
     }
+    /*
+    * 点击监听
+    * */
     private class ViewClickListener implements View.OnClickListener{
 
         @Override
@@ -806,7 +916,7 @@ public class Passenger extends AppCompatActivity {
             switch (view.getId()){
                 case R.id.passenger_passenger_start:
                     initDialogEvents();
-                    setOrder();
+                    setOrderDialog();
                     break;
                 case R.id.passenger_passenger_setTraffic:
                     clickNum++;
@@ -815,6 +925,9 @@ public class Passenger extends AppCompatActivity {
             }
         }
     }
+    /*
+    * 路线规划监听
+    * */
     private class RoutePlanResultListener implements OnGetRoutePlanResultListener {
         @Override
         public void onGetWalkingRouteResult(WalkingRouteResult walkingRouteResult) {
@@ -852,6 +965,9 @@ public class Passenger extends AppCompatActivity {
 
         }
     }
+    /*
+    * 地址编码,弃用
+    * */
     private class GeoCoderResultListener implements OnGetGeoCoderResultListener{
 
         @Override
@@ -868,6 +984,9 @@ public class Passenger extends AppCompatActivity {
             }
         }
     }
+    /*
+    * 标注点击监听
+    * */
     private class MarkerClickerListener implements BaiduMap.OnMarkerClickListener{
 
         @Override
@@ -1005,12 +1124,18 @@ public class Passenger extends AppCompatActivity {
             return true;
         }
     }
+    /*
+    * 地图长按监听
+    * */
     private class MapLongClickerListener implements BaiduMap.OnMapLongClickListener {
         @Override
         public void onMapLongClick(LatLng latLng) {
             baiduMap.clear();
         }
     }
+    /*
+    * NavigationView监听
+    * */
     private class NavigationViewListener implements NavigationView.OnNavigationItemSelectedListener {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -1047,35 +1172,44 @@ public class Passenger extends AppCompatActivity {
             return true;
         }
     }
+    /*
+    * 环信收信息监听
+    * */
     private class MessageListener implements  EMMessageListener{
 
+        /*
+        * 接收信息的接口
+        * */
         @Override
         public void onMessageReceived(List<EMMessage> messages) {
             Log.d("messageListener",".....");
             for (int i = 0; i < messages.size(); i++) {
                 String content = ((EMTextMessageBody) messages.get(i).getBody()).getMessage();
                 if (content.equals("start")){
+                    //如果标志位是start,则代表司机出发,这里非UI线程不能用Toast,所以用了Handle
                     Message message = new Message();
                     message.what = 1;
                     UIHandler.sendMessage(message);
                 }
                 if (content.split(",")[0].equals("location")){
+                    //如果是location,代表司机的位置
                     Double lat = Double.parseDouble(content.split(",")[1]);
                     Double lng = Double.parseDouble(content.split(",")[2]);
-                    MarkerOptions options = new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.fromResource(R.drawable.look_for_car));
+                    OverlayOptions options = new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_near));
                     baiduMap.addOverlay(options);
+                    //将司机位置和乘客之间的路线呈现在地图上
+                    //第一个参数代表自己的位置(测试点),第二个参数代表司机的位置,是传过来的,第三个是途径点,这里设为空
                     startGo(new LatLng(27.899096,112.923213),new LatLng(lat,lng),new ArrayList<PlanNode>());
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            baiduMap.clear();
-                            try{
-                                Thread.sleep(3000);
-                            }catch (InterruptedException e){
 
-                            }
-                        }
-                    }).start();
+                }
+                if (( content.split(",")[0].equals("arrive"))){
+                    Bundle bundle = new Bundle();
+                    bundle.putString(PayFragment.EXTRA_CONTENT, "这次乘车需支付：¥ " + ( content.split(",")[1]));
+                    fragment = new PayFragment();
+                    fragment.setArguments(bundle);
+                    fragment.setPaySuccessCallBack(new InputCallback());
+                    fragment.show(getSupportFragmentManager(), "Pay");
+                    break;
                 }
             }
         }
@@ -1097,6 +1231,26 @@ public class Passenger extends AppCompatActivity {
 
         @Override
         public void onMessageChanged(EMMessage message, Object change) {
+
+        }
+    }
+    /*
+    * 支付回调结果
+    * */
+    private class InputCallback implements PayPwdView.InputCallBack{
+
+        @Override
+        public void onInputFinish(String result) {
+            if (result.equals("123456")){
+                fragment.dismiss();
+                Message message = new Message();
+                message.what = 2;
+                UIHandler.sendMessage(message);
+            }else {
+                Message message = new Message();
+                message.what = 3;
+                UIHandler.sendMessage(message);
+            }
 
         }
     }

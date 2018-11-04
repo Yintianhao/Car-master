@@ -42,6 +42,7 @@ import com.android.volley.toolbox.Volley;
 import com.baidu.mapapi.SDKInitializer;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMOptions;
+import com.hyphenate.exceptions.HyphenateException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -479,8 +480,22 @@ public class Login extends AppCompatActivity implements RadioGroup.OnCheckedChan
             Toast.makeText(getApplicationContext(),"密码不能为空!",Toast.LENGTH_SHORT).show();
         }else{
             singUpRequest(registerTel.getText().toString(),registerPassWord.getText().toString());
+            registerMob(registerTel.getText().toString(),registerPassWord.getText().toString());
         }
         return true;
+    }
+    public static void registerMob(final String tel, final String passWord){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    EMClient.getInstance().createAccount(tel,
+                            passWord);
+                }catch (HyphenateException e){
+                    Log.e("聊天功能","注册失败");
+                }
+            }
+        }).start();
     }
     public void singUpRequest(final String accountNumber,final String password){
         //请求地址

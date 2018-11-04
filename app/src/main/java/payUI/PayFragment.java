@@ -67,7 +67,6 @@ public class PayFragment extends DialogFragment implements View.OnClickListener 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.iv_close:
-                dismiss();
                 break;
 
         }

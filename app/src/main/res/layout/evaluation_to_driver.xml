@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:text="谈吐有方"
+            android:textSize="18sp" />
+
+        <Tool.StarBar
+            android:id="@+id/driver_behavior"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            app:space_width="5dp"
+            app:star_height="20dp"
+            app:star_hollow="@drawable/ic_rating_bar_hollow"
+            app:star_max="5"
+            app:star_rating="0"
+            app:star_solid="@drawable/ic_rating_bar_solid"
+            app:star_width="20dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:text="车内环境"
+            android:textSize="18sp" />
+
+        <Tool.StarBar
+            android:id="@+id/driver_car_environ"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            app:space_width="5dp"
+            app:star_height="20dp"
+            app:star_hollow="@drawable/ic_rating_bar_hollow"
+            app:star_max="5"
+            app:star_rating="0"
+            app:star_solid="@drawable/ic_rating_bar_solid"
+            app:star_width="20dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:text="行车安全"
+            android:textSize="18sp" />
+
+        <Tool.StarBar
+            android:id="@+id/driver_security"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            app:space_width="5dp"
+            app:star_height="20dp"
+            app:star_hollow="@drawable/ic_rating_bar_hollow"
+            app:star_max="5"
+            app:star_rating="0"
+            app:star_solid="@drawable/ic_rating_bar_solid"
+            app:star_width="20dp" />
+    </LinearLayout>
+    <Button
+        android:id="@+id/summit"
+        android:text="提交"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        />
+</LinearLayout>

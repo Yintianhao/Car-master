@@ -177,10 +177,12 @@
             android:theme="@style/NoActionBar">
 
         </activity>
+
         <activity
             android:name="com.amap.api.navi.AmapRouteActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@android:style/Theme.NoTitleBar" />
+
         <activity android:name=".RegisterOfPassenger" />
         <activity android:name=".Passenger" android:theme="@style/AppTheme" />
         <activity android:name=".Setting" />
@@ -192,7 +194,7 @@
 
         <meta-data
             android:name="EASEMOB_APPKEY"
-            android:value="1152180806253739#mychatting " />
+            android:value="1152180806253739#mychatting" />
         <!-- 声明SDK所需的service SDK核心功能 -->
         <service
             android:name="com.hyphenate.chat.EMChatService"

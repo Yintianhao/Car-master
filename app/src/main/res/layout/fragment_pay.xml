@@ -51,7 +51,7 @@
             android:layout_gravity="center_horizontal"
             android:gravity="center" />
 
-        <com.example.payui.PayPwdView
+        <payUI.PayPwdView
             android:id="@+id/payPwdView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
     </LinearLayout>
 
 
-    <com.example.payui.PwdInputMethodView
+    <payUI.PwdInputMethodView
         android:id="@+id/inputMethodView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
