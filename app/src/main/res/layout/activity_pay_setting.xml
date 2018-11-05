@@ -10,22 +10,6 @@
         android:layout_height="80dp">
     </LinearLayout>
 
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="65dp"
-        android:paddingTop="20dp"
-        android:gravity="center">
-        <EditText
-            android:id="@+id/Accountsetting_oldpwd"
-            android:layout_width="250dp"
-            android:layout_height="match_parent"
-            android:inputType="numberPassword"
-            android:maxLines="1"
-            android:hint="旧密码"
-            android:textSize="20sp"/>
-    </LinearLayout>
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -34,7 +18,7 @@
         android:gravity="center">
         <EditText
             android:inputType="numberPassword"
-            android:id="@+id/Accountsetting_newpwd"
+            android:id="@+id/pay_setting_newpwd"
             android:layout_width="250dp"
             android:layout_height="match_parent"
             android:maxLines="1"
@@ -47,7 +31,7 @@
         android:paddingTop="20dp"
         android:gravity="center">
         <EditText
-            android:id="@+id/Accountsetting_againpwd"
+            android:id="@+id/pay_setting_againpwd"
             android:layout_width="250dp"
             android:layout_height="match_parent"
             android:inputType="numberPassword"
@@ -56,35 +40,13 @@
             android:textSize="20sp"/>
     </LinearLayout>
     <LinearLayout
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="45dp"
-        android:paddingTop="10dp">
-
-        <TextView
-            android:id="@+id/Accountsetting_getCode"
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:clickable="true"
-            android:text="获取验证码"
-            android:textSize="18sp" />
-        <EditText
-            android:id="@+id/Accountsetting_verificationCode"
-            android:layout_width="140dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="10dp"
-            android:maxLines="1" />
-    </LinearLayout>
-    <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:paddingTop="20dp"
         android:gravity="center">
         <TextView
-            android:id="@+id/Accountsetting_save"
+            android:id="@+id/pay_setting_save"
             android:layout_width="200dp"
             android:layout_height="45dp"
             android:gravity="center"

@@ -165,6 +165,9 @@ public class Driver extends AppCompatActivity {
     List<Boolean> isTraffic;
     int clickNum = 0;
 
+    /*
+    * UIhandler
+    * */
     private Handler handler = new Handler(){
       @Override
       public void handleMessage(Message msg){
@@ -197,6 +200,9 @@ public class Driver extends AppCompatActivity {
         //initMyTestLocation();
     }
 
+    /*
+    * 初始化RecyclerView
+    * */
     public void initRecyclerView(){
         inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         linearLayout = (LinearLayout) inflater.inflate(R.layout.nearby_passenger_list, null);
@@ -207,6 +213,9 @@ public class Driver extends AppCompatActivity {
         recyclerView.setAdapter(matchAdapter);
     }
 
+    /*
+    * 初始化DrawerLayout
+    * */
     public void initDrawerLayout(){
         //initLocation();
         latestLocationInfo = (TextView) findViewById(R.id.driver_locationInfo);
@@ -255,6 +264,9 @@ public class Driver extends AppCompatActivity {
         isTraffic.add(true);
     }
 
+    /*
+    * 各控件添加监听器
+    * */
     public void addListener(){
         //悬浮按钮监听
         go.setOnClickListener(new ViewClickListener());
@@ -277,6 +289,9 @@ public class Driver extends AppCompatActivity {
         setTraffic.setOnClickListener(new ViewClickListener());
     }
 
+    /*
+    * 判断安卓版本
+    * */
     public void isAndroidSix(){
         //初始化经纬度以及详细地址，判断是否为android6.0系统版本，如果是，需要动态添加权限
         if (Build.VERSION.SDK_INT>=23){
@@ -285,7 +300,9 @@ public class Driver extends AppCompatActivity {
             initLocation();//init为定位方法
         }
     }
-
+    /*
+    * 初始化位置信息
+    * */
     public void initLocation(){
         latestLocationInfo = (TextView) findViewById(R.id.driver_locationInfo);
         location = new LocationClient(getApplicationContext());
@@ -294,14 +311,18 @@ public class Driver extends AppCompatActivity {
         setViews();
         location.start();
     }
-
+    /*
+    * 添加按照POI搜索
+    * */
     public void addSearch(){
         //根据城市名和key搜索
         poiCitySearchOption = new PoiCitySearchOption();
         poiCitySearchOption.city("湘潭市").keyword(searchByInput.getText().toString()).pageNum(0).pageCapacity(10);
         poiSearch.searchInCity(poiCitySearchOption);
     }
-
+    /*
+    * 配置位置监听器的相关属性
+    * */
     public void setViews() {
         LocationClientOption option = new LocationClientOption();
         option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);//可选，默认高精度，设置定位模式，高精度，低功耗，仅设备
@@ -318,6 +339,9 @@ public class Driver extends AppCompatActivity {
         location.setLocOption(option);
     }
 
+    /*
+    * 弹出权限提醒
+    * */
     public void showContacts(){
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED
@@ -332,6 +356,11 @@ public class Driver extends AppCompatActivity {
         }
     }
 
+    /*
+    * 路线规划画线
+    * @param start 起点
+    * @param end 终点
+    * */
     public void startGo(LatLng start,LatLng end){
         try{
             PlanNode begin = PlanNode.withLocation(start);
@@ -507,6 +536,9 @@ public class Driver extends AppCompatActivity {
             }
         });
     }
+    /*
+    * 登录
+    * */
     public void signUp(){
         String tel = getSharedPreferences("Setting", MODE_MULTI_PROCESS).getString("user","");
         String passWord = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("passWord","");
@@ -533,6 +565,9 @@ public class Driver extends AppCompatActivity {
                     }
                 });
     }
+    /*
+    * 退出登录
+    * */
     public void signDown(){
         EMClient.getInstance().logout(false, new EMCallBack() {
             @Override
@@ -552,6 +587,11 @@ public class Driver extends AppCompatActivity {
             }
         });
     }
+    /*
+    * 发送信息
+    * @param content 发送内容
+    * @param chatId 对方账号
+    * */
     public void sendMessage(String content,String chatWithId) {
         EMMessage message = EMMessage.createTxtSendMessage(content,chatWithId);
 //如果是群聊，设置chattype，默认是单聊
@@ -591,35 +631,11 @@ public class Driver extends AppCompatActivity {
             }
         });
     }
-    public void drawRouteLine(DrivingRouteResult drivingRouteResult,int routeNum){
-        if (wayNodes!=null){
-            wayNodes.clear();
-            wayNames.clear();
-        }
-        int[] color = {Color.BLACK,Color.BLUE,Color.CYAN,Color.DKGRAY
-                ,Color.GRAY,Color.GREEN,Color.LTGRAY,Color.YELLOW, Color.RED,Color.MAGENTA};//颜色的数组，用来随机选一种颜色表示路线
-        List<LatLng> linePoints = new ArrayList<>();//路线上点的集合
-        wayNodes = new ArrayList<>();
-        wayNames = new ArrayList<>();
-        //百度地图的一条路线分为路段，getAllStep就是得到一条路线的所有路段，
-        // 然后再一条路段上用getWayPoints路段的点，点一般为转弯处或者交叉路口
-        for(int i = 0; i < drivingRouteResult.getRouteLines().get(routeNum).getAllStep().size();i++){
-            for (int j = 0 ;j < drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().size();j++){
-                LatLng node = new LatLng(drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().get(j).latitude
-                        ,drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().get(j).longitude);
-                if(j==0){
-                    OverlayOptions options = new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_point))
-                            .position(node);
-                    wayNodes.add(node);
-                    wayNames.add(drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getInstructions());
-                    baiduMap.addOverlay(options);
-                }
-                linePoints.add(node);//将点添加到集合上
-            }
-            OverlayOptions ooPolyLine = new PolylineOptions().width(5).color(color[(int)(Math.random()*10)]).points(linePoints);//设置折线的属性,颜色等
-            Polyline polyline = (Polyline) baiduMap.addOverlay(ooPolyLine);//添加到地图
-        }
-    }
+
+    /*
+    * 由一个经纬度获得该点的信息
+    * @param position 某点的坐标(百度坐标)
+    * */
     public String getMessage(LatLng position){
 
         GeoCoder searchByLatLng = GeoCoder.newInstance();
@@ -638,6 +654,12 @@ public class Driver extends AppCompatActivity {
         searchByLatLng.reverseGeoCode(new ReverseGeoCodeOption().location(position));
         return backMessage;
     }
+    /*
+    * 获得附近的车
+    * @param userID 用户账号
+    * @param latitude 经度
+    * @param longitude 纬度
+    * */
     public void getNearbyCar(final String userID, final String latitude, final String longitude){
 
         String url = "http://47.106.72.170:8080/MyCarSharing/taxiRequestWithStart.action";
@@ -707,6 +729,10 @@ public class Driver extends AppCompatActivity {
         //将请求添加到队列中
         requestQueue.add(request);
     }
+
+    /*
+    * 获得附近的乘客
+    * */
     public void showNearbyPassenger(){
         initRecyclerView();
         dialog = new AlertDialog.Builder(this)
@@ -738,6 +764,9 @@ public class Driver extends AppCompatActivity {
         dialogWindow.setGravity(Gravity.BOTTOM);
         dialogWindow.setAttributes(params);
     }
+    /*
+    * 获得方向信息(弃用)
+    * */
     public void showDirectionInfo(){
         try {
             if(wayNodes.size()==0){
@@ -766,6 +795,14 @@ public class Driver extends AppCompatActivity {
 
         }
     }
+    /*
+    * 获得缓存区中的车
+    * @param phoneNum 电话号码
+    * @param nowLatitude nowLongitude 当前位置的经纬度
+    * @param endLatitude endLongitude 目的地的经纬度
+    * @param startDate 开始的时间
+    * @param endDate 结束日期
+    * */
     public void getRoadNearbyCar(final String phoneNum, final String nowLatitude, final String nowLongitude, final String endLatitude,
                                  final String endLongitude, final String startDate, final String endDate){
 
@@ -838,6 +875,10 @@ public class Driver extends AppCompatActivity {
         //将请求添加到队列中
         requestQueue.add(request);
     }
+
+    /*
+    * 初始化InfoWindow(或弃用)
+    * */
     public void initInfoWindow(LatLng node,String info){
         TextView infoWindowTv=new TextView(Driver.this);
         infoWindowTv.setBackgroundResource(R.drawable.icon_location_tips);
@@ -855,6 +896,9 @@ public class Driver extends AppCompatActivity {
         //显示信息窗口
         baiduMap.showInfoWindow(infoWindow);
     }
+    /*
+    * 获得预测的车(未与后台对接)
+    * */
     public void getPredictedCar(){
         /*
          * 获得格式化的时间,YY-MM-DD-HH-MM
@@ -934,7 +978,9 @@ public class Driver extends AppCompatActivity {
         }
     }
 
-
+    /*
+    * 位置监听
+    * */
     private class MyLocationListener implements BDLocationListener {
 
         /*
@@ -962,6 +1008,9 @@ public class Driver extends AppCompatActivity {
             }
         }
     }
+    /*
+    * NavigationView 监听
+    * */
     private class NavigationViewListener implements NavigationView.OnNavigationItemSelectedListener{
 
         @Override
@@ -1003,6 +1052,9 @@ public class Driver extends AppCompatActivity {
             return true;
         }
     }
+    /*
+    * POI搜索监听
+    * */
     private class PoiSearchResultListener implements OnGetPoiSearchResultListener{
 
         //poi搜索结果
@@ -1036,6 +1088,9 @@ public class Driver extends AppCompatActivity {
         public void onGetPoiIndoorResult(PoiIndoorResult poiIndoorResult) {
         }
     }
+    /*
+    * 地理编码
+    * */
     private class GeoCoderResultListener implements OnGetGeoCoderResultListener{
 
         @Override
@@ -1056,7 +1111,11 @@ public class Driver extends AppCompatActivity {
         public void onGetReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
         }
     }
+    /*
+    * 路线规划
+    * */
     private class GetRoutePlanResultListener implements OnGetRoutePlanResultListener{
+
         @Override
         public void onGetWalkingRouteResult(WalkingRouteResult walkingRouteResult) {
         }
@@ -1080,8 +1139,38 @@ public class Driver extends AppCompatActivity {
         @Override
         public void onGetBikingRouteResult(BikingRouteResult bikingRouteResult) {
         }
+        /*
+         * 画线
+         * @param DrivingRouteResult 路线规划结果集
+         * @param routeNum 路线号
+         * */
+        public void drawRouteLine(DrivingRouteResult drivingRouteResult,int routeNum){
+            if (wayNodes!=null){
+                wayNodes.clear();
+                wayNames.clear();
+            }
+            int[] color = {Color.BLACK,Color.BLUE,Color.CYAN,Color.DKGRAY
+                    ,Color.GRAY,Color.GREEN,Color.LTGRAY,Color.YELLOW, Color.RED,Color.MAGENTA};//颜色的数组，用来随机选一种颜色表示路线
+            List<LatLng> linePoints = new ArrayList<>();//路线上点的集合
+            wayNodes = new ArrayList<>();
+            wayNames = new ArrayList<>();
+            //百度地图的一条路线分为路段，getAllStep就是得到一条路线的所有路段，
+            // 然后再一条路段上用getWayPoints路段的点，点一般为转弯处或者交叉路口
+            for(int i = 0; i < drivingRouteResult.getRouteLines().get(routeNum).getAllStep().size();i++){
+                for (int j = 0 ;j < drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().size();j++){
+                    LatLng node = new LatLng(drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().get(j).latitude
+                            ,drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().get(j).longitude);
+                    linePoints.add(node);//将点添加到集合上
+                }
+                OverlayOptions ooPolyLine = new PolylineOptions().width(15).color(Color.YELLOW).points(linePoints);//设置折线的属性,颜色等
+                Polyline polyline = (Polyline) baiduMap.addOverlay(ooPolyLine);//添加到地图
+            }
+        }
 
     }
+    /*
+    * 地图长按监听
+    * */
     private class MapLongClickListener implements BaiduMap.OnMapLongClickListener{
 
         @Override
@@ -1095,6 +1184,9 @@ public class Driver extends AppCompatActivity {
         }
 
     }
+    /*
+    * 地图点击监听
+    * */
     private class MapClickListener implements BaiduMap.OnMapClickListener {
 
         @Override
@@ -1157,6 +1249,9 @@ public class Driver extends AppCompatActivity {
         }
 
     }
+    /*
+    * 文本监听
+    * */
     private class TextWatcher implements android.text.TextWatcher{
 
         @Override
@@ -1177,6 +1272,9 @@ public class Driver extends AppCompatActivity {
         }
 
     }
+    /*
+    * Item点击监听
+    * */
     private class ItemClickListener implements AdapterView.OnItemClickListener{
 
         @Override
@@ -1191,6 +1289,9 @@ public class Driver extends AppCompatActivity {
             }
         }
     }
+    /*
+    * 视图点击
+    * */
     private class ViewClickListener implements View.OnClickListener{
 
         //全局点击监听
@@ -1248,6 +1349,9 @@ public class Driver extends AppCompatActivity {
 
 
     }
+    /*
+    * 标注点击
+    * */
     private class MarkerClickListener implements BaiduMap.OnMarkerClickListener {
 
         @Override

@@ -51,7 +51,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_margin="20dp"
                 android:hint="密码"
-                android:inputType="textCapSentences"
+                android:inputType="numberPassword"
                 android:padding="20dp"
                 android:visibility="gone" />
 
@@ -64,7 +64,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_margin="20dp"
                 android:hint="确认密码"
-                android:inputType="textCapSentences"
+                android:inputType="numberPassword"
                 android:padding="20dp"
                 android:visibility="gone" />
 
@@ -122,7 +122,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_margin="20dp"
                 android:hint="密码"
-                android:inputType="textCapSentences"
+                android:inputType="numberPassword"
                 android:padding="20dp" />
 
             <RadioGroup

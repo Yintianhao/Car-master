@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Contacts;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -157,6 +158,9 @@ public class Passenger extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg){
             switch (msg.what){
+                case 4:
+                    baiduMap.clear();
+                    break;
                 case 3:
                     Toast.makeText(Passenger.this,"密码错误,请重新输入!",Toast.LENGTH_SHORT).show();
                     break;
@@ -1141,6 +1145,10 @@ public class Passenger extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             //判断点击了哪个item
             switch (item.getItemId()){
+                //支付密码设置
+                case R.id.pay_setting:
+                    startActivity(new Intent(Passenger.this,PaySetting.class));
+                    break;
                 //设置
                 case R.id.nav_setting:
                     Intent to_setting = new Intent(Passenger.this,Setting.class);
@@ -1176,7 +1184,6 @@ public class Passenger extends AppCompatActivity {
     * 环信收信息监听
     * */
     private class MessageListener implements  EMMessageListener{
-
         /*
         * 接收信息的接口
         * */
@@ -1193,6 +1200,9 @@ public class Passenger extends AppCompatActivity {
                 }
                 if (content.split(",")[0].equals("location")){
                     //如果是location,代表司机的位置
+                    /*Message message = new Message();
+                    message.what = 4;
+                    UIHandler.sendMessage(message);*/
                     Double lat = Double.parseDouble(content.split(",")[1]);
                     Double lng = Double.parseDouble(content.split(",")[2]);
                     OverlayOptions options = new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_near));
@@ -1200,9 +1210,9 @@ public class Passenger extends AppCompatActivity {
                     //将司机位置和乘客之间的路线呈现在地图上
                     //第一个参数代表自己的位置(测试点),第二个参数代表司机的位置,是传过来的,第三个是途径点,这里设为空
                     startGo(new LatLng(27.899096,112.923213),new LatLng(lat,lng),new ArrayList<PlanNode>());
-
                 }
                 if (( content.split(",")[0].equals("arrive"))){
+
                     Bundle bundle = new Bundle();
                     bundle.putString(PayFragment.EXTRA_CONTENT, "这次乘车需支付：¥ " + ( content.split(",")[1]));
                     fragment = new PayFragment();

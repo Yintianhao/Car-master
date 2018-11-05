@@ -165,29 +165,31 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".Welcome"
+        <activity
+            android:name=".Welcome"
             android:theme="@style/NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".Login"
-            android:theme="@style/NoActionBar">
-
-        </activity>
-
+            android:theme="@style/NoActionBar"></activity>
         <activity
             android:name="com.amap.api.navi.AmapRouteActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@android:style/Theme.NoTitleBar" />
-
         <activity android:name=".RegisterOfPassenger" />
-        <activity android:name=".Passenger" android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Passenger"
+            android:theme="@style/AppTheme" />
         <activity android:name=".Setting" />
         <activity android:name=".About" />
-        <activity android:name=".Driver" android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Driver"
+            android:theme="@style/AppTheme" />
         <activity android:name=".AccountSetting" />
         <activity android:name=".CarSetting" />
         <activity android:name=".Chatting" />
@@ -228,7 +230,7 @@
             android:value="@integer/google_play_services_version" />
 
         <activity android:name=".MatchShow" />
-
+        <activity android:name=".PaySetting"></activity>
     </application>
 
 </manifest>

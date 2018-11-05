@@ -9,7 +9,11 @@
         <item
             android:id="@+id/account_setting"
             android:icon="@drawable/ic_setting"
-            android:title="账号设置"/>
+            android:title="隐私设置"/>
+        <item
+            android:id="@+id/pay_setting"
+            android:icon="@drawable/ic_setting"
+            android:title="支付设置"/>
         <item
             android:id="@+id/nav_about"
             android:icon="@drawable/ic_about"
