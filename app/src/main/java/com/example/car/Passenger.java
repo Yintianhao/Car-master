@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Contacts;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -100,6 +99,7 @@ import java.util.List;
 import java.util.Map;
 
 import Tool.Const;
+import Tool.MD5;
 import Tool.StarBar;
 import WheelView.Adapter.NumericWheelAdapter;
 import WheelView.WheelView;
@@ -293,6 +293,8 @@ public class Passenger extends AppCompatActivity {
         * */
         sharedPreferences = getSharedPreferences("Setting",MODE_MULTI_PROCESS);
         editor = sharedPreferences.edit();
+        editor.putString("payPassWord","e10adc3949ba59abbe56e057f20f883e");
+        editor.commit();
         image_path = sharedPreferences.getString("passenger_image_path"+getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("user",""),"");
         Log.d("侧滑栏图片路径:",image_path+"....");
         navigationView = (NavigationView)findViewById(R.id.passenger_passenger_navView);
@@ -620,6 +622,7 @@ public class Passenger extends AppCompatActivity {
     * @param wayPoints 途径点
     * */
     public void startGo(LatLng start,LatLng end,List<PlanNode> wayPoints){
+        Log.d("startGo","run");
         try{
             PlanNode begin = PlanNode.withLocation(start);
             PlanNode destination = PlanNode.withLocation(end);
@@ -708,28 +711,7 @@ public class Passenger extends AppCompatActivity {
             }
         });
     }
-    /*
-    * 画路线
-    * */
-    public void drawRouteLine(DrivingRouteResult drivingRouteResult,int routeNum){
-        /*
-         * drivingRouteResult,结果,routeNum,路线编号
-         * */
-        int[] color = {Color.BLACK,Color.BLUE,Color.CYAN,Color.DKGRAY
-                ,Color.GRAY,Color.GREEN,Color.LTGRAY,Color.YELLOW, Color.RED,Color.MAGENTA};//颜色的数组，用来随机选一种颜色表示路线
-        List<LatLng> linePoints = new ArrayList<>();//路线上点的集合
-        //百度地图的一条路线分为路段，getAllStep就是得到一条路线的所有路段，
-        // 然后再一条路段上用getWayPoints路段的点，点一般为转弯处或者交叉路口
-        for(int i = 0; i < drivingRouteResult.getRouteLines().get(routeNum).getAllStep().size();i++){
-            for (int j = 0 ;j < drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().size();j++){
-                LatLng node = new LatLng(drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().get(j).latitude
-                        ,drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().get(j).longitude);
-                linePoints.add(node);//将点添加到集合上
-            }
-            OverlayOptions ooPolyLine = new PolylineOptions().width(15).color(Color.YELLOW).points(linePoints);//设置折线的属性,颜色等
-            Polyline polyline = (Polyline) baiduMap.addOverlay(ooPolyLine);//添加到地图
-        }
-    }
+
     /*
     * 菜单选择
     * */
@@ -933,6 +915,7 @@ public class Passenger extends AppCompatActivity {
     * 路线规划监听
     * */
     private class RoutePlanResultListener implements OnGetRoutePlanResultListener {
+        List<Polyline> lines = new ArrayList<>();
         @Override
         public void onGetWalkingRouteResult(WalkingRouteResult walkingRouteResult) {
 
@@ -967,6 +950,34 @@ public class Passenger extends AppCompatActivity {
         @Override
         public void onGetBikingRouteResult(BikingRouteResult bikingRouteResult) {
 
+        }
+        /*
+         * 画路线
+         * @param drivingRouteResult 路线规划的结果
+         * @param routeNum 路线编号(取0)
+         * */
+        public void drawRouteLine(DrivingRouteResult drivingRouteResult,int routeNum){
+            List<LatLng> linePoints = new ArrayList<>();//路线上点的集合
+            //百度地图的一条路线分为路段，getAllStep就是得到一条路线的所有路段，
+            // 然后再一条路段上用getWayPoints路段的点，点一般为转弯处或者交叉路口
+            for(int i = 0; i < drivingRouteResult.getRouteLines().get(routeNum).getAllStep().size();i++){
+                for (int j = 0 ;j < drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().size();j++){
+                    LatLng node = new LatLng(drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().get(j).latitude
+                            ,drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().get(j).longitude);
+                    linePoints.add(node);//将点添加到集合上
+                }
+                OverlayOptions ooPolyLine = new PolylineOptions().width(12).color(Color.YELLOW).points(linePoints);//设置折线的属性,颜色等
+                Polyline polyline = (Polyline) baiduMap.addOverlay(ooPolyLine);//添加到地图
+                lines.add(polyline);
+                Log.d("lines有",lines.size()+"根");
+                if(lines.size()>1){
+                    for(int len = 0;len < lines.size()-1;len++){
+                        Log.d("Line"+len,"设置为不可见");
+                        lines.get(len).setVisible(false);
+                    }
+                }
+
+            }
         }
     }
     /*
@@ -1192,17 +1203,23 @@ public class Passenger extends AppCompatActivity {
             Log.d("messageListener",".....");
             for (int i = 0; i < messages.size(); i++) {
                 String content = ((EMTextMessageBody) messages.get(i).getBody()).getMessage();
-                if (content.equals("start")){
+                Log.d("信息内容",content);
+                if (content.split(",")[0].equals("start")){
                     //如果标志位是start,则代表司机出发,这里非UI线程不能用Toast,所以用了Handle
+                    baiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(17));//设置缩放比例
+                    Double lat = Double.parseDouble(content.split(",")[1]);
+                    Double lng = Double.parseDouble(content.split(",")[2]);
+                    OverlayOptions options = new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_near));
+                    baiduMap.addOverlay(options);
                     Message message = new Message();
                     message.what = 1;
                     UIHandler.sendMessage(message);
                 }
                 if (content.split(",")[0].equals("location")){
                     //如果是location,代表司机的位置
-                    /*Message message = new Message();
+                    Message message = new Message();
                     message.what = 4;
-                    UIHandler.sendMessage(message);*/
+                    UIHandler.sendMessage(message);
                     Double lat = Double.parseDouble(content.split(",")[1]);
                     Double lng = Double.parseDouble(content.split(",")[2]);
                     OverlayOptions options = new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_near));
@@ -1212,7 +1229,6 @@ public class Passenger extends AppCompatActivity {
                     startGo(new LatLng(27.899096,112.923213),new LatLng(lat,lng),new ArrayList<PlanNode>());
                 }
                 if (( content.split(",")[0].equals("arrive"))){
-
                     Bundle bundle = new Bundle();
                     bundle.putString(PayFragment.EXTRA_CONTENT, "这次乘车需支付：¥ " + ( content.split(",")[1]));
                     fragment = new PayFragment();
@@ -1251,7 +1267,8 @@ public class Passenger extends AppCompatActivity {
 
         @Override
         public void onInputFinish(String result) {
-            if (result.equals("123456")){
+            String oldPassWord = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("payPassWord","");
+            if (oldPassWord.equals(MD5.getMD5(result))){
                 fragment.dismiss();
                 Message message = new Message();
                 message.what = 2;

@@ -374,8 +374,9 @@ public class Driver extends AppCompatActivity {
     /*
     * @param start开始点 end终点 wayList途经点
     * */
-    public void voiceNavi(LatLng start,LatLng end,List<Poi> wayList) {
+    public void voiceNavi(LatLng start, LatLng end, List<Poi> wayList) {
         //将百度地图坐标转化为高德地图坐标
+        final LatLng latLng = start;
         double[] startConverted  = GPSConvert.bd09_To_Gcj02(start.latitude,start.longitude);
         double[] endConverted = GPSConvert.bd09_To_Gcj02(end.latitude,end.longitude);
         //包装成高德地图的点
@@ -447,13 +448,17 @@ public class Driver extends AppCompatActivity {
             @Override
             public void onStartNavi(int i) {
                 //启动导航
+                //高德地图转百度地图坐标
+
                 try{
                     if (onRoadPassengers!=null&&onRoadPassengers.size()!=0){
                         for (int j = 0;j < onRoadPassengers.size();j++){
                             String tel = onRoadPassengers.get(j).getString("userid");
+                            String content = "start,"+String.valueOf(latLng.latitude)+","+String.valueOf(latLng.longitude);
                             Log.d("出发发送信息给",tel);
+                            Log.d("发送内容",content);
                             //发送start 表示出发
-                            sendMessage("start",tel);
+                            sendMessage(content,tel);
                             Message message = new Message();
                             message.what = 3;
                             Bundle bundle = new Bundle();
@@ -491,7 +496,7 @@ public class Driver extends AppCompatActivity {
 
             @Override
             public void onExitPage(int i) {
-               /* try{
+               try{
                     //这个List代表沿路的乘客
                     if (onRoadPassengers!=null&&onRoadPassengers.size()!=0){
                         for (int j = 0;j < onRoadPassengers.size();j++){
@@ -508,7 +513,7 @@ public class Driver extends AppCompatActivity {
                 }
                 Message message = new Message();
                 message.what = 5;
-                handler.sendMessage(message);*/
+                handler.sendMessage(message);
             }
 
             @Override
@@ -1162,7 +1167,7 @@ public class Driver extends AppCompatActivity {
                             ,drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().get(j).longitude);
                     linePoints.add(node);//将点添加到集合上
                 }
-                OverlayOptions ooPolyLine = new PolylineOptions().width(15).color(Color.YELLOW).points(linePoints);//设置折线的属性,颜色等
+                OverlayOptions ooPolyLine = new PolylineOptions().width(12).color(Color.YELLOW).points(linePoints);//设置折线的属性,颜色等
                 Polyline polyline = (Polyline) baiduMap.addOverlay(ooPolyLine);//添加到地图
             }
         }
