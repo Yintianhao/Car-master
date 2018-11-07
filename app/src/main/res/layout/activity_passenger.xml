@@ -35,13 +35,20 @@
             android:layout_marginBottom="90dp"
             android:src="@drawable/icon_trafficshow"/>
 
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/passenger_to_driver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginRight="27dp"
+            android:layout_marginBottom="200dp"
+            android:src="@drawable/icon_car"/>
         <com.baidu.mapapi.map.MapView
             android:id="@+id/passenger_passenger_mapView"
             android:layout_width="fill_parent"
             android:layout_height="530dp"
             android:layout_alignParentRight="true"
             android:clickable="true" />
-
         <TextView
             android:layout_gravity="bottom"
             android:layout_width="wrap_content"
@@ -51,7 +58,6 @@
             android:textSize="18dp"
             android:textStyle="italic"
             android:gravity="center_horizontal"/>
-
     </FrameLayout>
 
     <android.support.design.widget.NavigationView

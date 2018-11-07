@@ -19,6 +19,7 @@
             android:gravity="center_horizontal"
             android:layout_marginTop="10dp"
             android:text="谈吐有方"
+            android:textColor="#0000FF"
             android:textSize="18sp" />
 
         <Tool.StarBar
@@ -50,6 +51,7 @@
             android:gravity="center_horizontal"
             android:layout_marginTop="10dp"
             android:text="车内环境"
+            android:textColor="#0000FF"
             android:textSize="18sp" />
 
         <Tool.StarBar
@@ -81,6 +83,7 @@
             android:gravity="center_horizontal"
             android:layout_marginTop="10dp"
             android:text="行车安全"
+            android:textColor="#0000FF"
             android:textSize="18sp" />
 
         <Tool.StarBar
@@ -101,6 +104,7 @@
     <Button
         android:id="@+id/summit"
         android:text="提交"
+        android:textColor="#0000FF"
         android:layout_gravity="center_horizontal"
         android:layout_width="200dp"
         android:layout_height="50dp"

@@ -10,7 +10,8 @@
         android:layout_height="match_parent"
         android:adjustViewBounds="false"
         android:scaleX="3"
-        android:scaleY="3"/>
+        android:scaleY="3"
+        android:src="@drawable/icon_back_login"/>
 
     <LinearLayout xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/mainLinear"
@@ -18,8 +19,7 @@
         android:layout_height="match_parent"
         android:orientation="horizontal"
         android:weightSum="5"
-        tools:context="com.example.carpoolgo.Login"
-        >
+        tools:context="com.example.carpoolgo.Login">
 
         <!-- TODO: Update blank fragment layout -->
 

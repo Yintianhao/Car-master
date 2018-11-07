@@ -437,7 +437,7 @@ public class WheelView extends View {
 			bottomShadow = new GradientDrawable(Orientation.BOTTOM_TOP, SHADOWS_COLORS);
 		}
 
-		setBackgroundResource(R.drawable.wheel_bg);
+		setBackgroundResource(R.drawable.input_bg);
 	}
 	
 	/**
@@ -697,7 +697,7 @@ public class WheelView extends View {
 		
 	/**
 	 * Scroll the wheel
-	 * @param itemsToSkip items to scroll
+	 * @param
 	 * @param time scrolling duration
 	 */
 	public void scroll(int itemsToScroll, int time) {

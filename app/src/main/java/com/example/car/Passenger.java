@@ -31,6 +31,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -143,6 +144,7 @@ public class Passenger extends AppCompatActivity {
     int clickNum = 0;
 
     FloatingActionButton setTraffic;
+    FloatingActionButton driverInfo;
     View view;
 
     LayoutInflater inflater;
@@ -152,6 +154,9 @@ public class Passenger extends AppCompatActivity {
 
     //支付布局
     PayFragment fragment;
+
+    //司机的JSON对象
+    JSONObject driverObject;
 
     //UI的handle
     private Handler UIHandler = new Handler(){
@@ -326,6 +331,10 @@ public class Passenger extends AppCompatActivity {
         UiSettings settings = baiduMap.getUiSettings();
         settings.setOverlookingGesturesEnabled(false);
         settings.setRotateGesturesEnabled(false);
+        driverInfo = (FloatingActionButton) findViewById(R.id.passenger_to_driver);
+        driverInfo.setOnClickListener(new ViewClickListener());
+        driverInfo.setVisibility(View.INVISIBLE);
+        driverObject = new JSONObject();
     }
 
     /**
@@ -754,6 +763,54 @@ public class Passenger extends AppCompatActivity {
             location.unRegisterLocationListener(listener);
         }
     }
+    public void showDriverDialog(List<JSONObject> onRoadPassengers){
+        LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+        View view = inflater.inflate(R.layout.driver_dialog_info, null);
+        //view.setBackgroundResource(R.drawable.icon_info_background);
+        TextView driverName = (TextView) view.findViewById(R.id.driver_name);
+        TextView carNum = (TextView)view.findViewById(R.id.driver_carNum);
+        Button toCall = (Button) view.findViewById(R.id.to_tel);
+        Button toChat = (Button) view.findViewById(R.id.to_chat);
+        try{
+            for (int i = 0;i < onRoadPassengers.size();i++){
+                if(onRoadPassengers.get(i).getString("supplycar").equals("1")){
+                    driverObject = onRoadPassengers.get(i);
+                    break;
+                }
+            }
+            driverName.setText(driverObject.getString("name"));
+            carNum.setText(driverObject.getString("carnum"));
+        }catch (JSONException e){
+        }
+
+        toCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+driverObject.getString("userid"))));
+                }catch (JSONException e){
+
+                }
+            }
+        });
+        toChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    String destination = driverObject.getString("userid");
+                    Intent intent = new Intent(Passenger.this,Chatting.class);
+                    intent.putExtra("destinationTel",destination);
+                    startActivity(intent);
+                }catch (JSONException e){
+
+                }
+            }
+        });
+        AlertDialog dialog = new  AlertDialog.Builder(Passenger.this)
+                .setView(view)
+                .create();
+        dialog.show();
+    }
     /*
     * 请求字符串编码转换
     * */
@@ -900,6 +957,9 @@ public class Passenger extends AppCompatActivity {
         @Override
         public void onClick(View view) {
             switch (view.getId()){
+                case R.id.passenger_to_driver:
+                    showDriverDialog(onRoadPassengers);
+                    break;
                 case R.id.passenger_passenger_start:
                     initDialogEvents();
                     setOrderDialog();
@@ -956,7 +1016,7 @@ public class Passenger extends AppCompatActivity {
          * @param drivingRouteResult 路线规划的结果
          * @param routeNum 路线编号(取0)
          * */
-        public void drawRouteLine(DrivingRouteResult drivingRouteResult,int routeNum){
+        void drawRouteLine(DrivingRouteResult drivingRouteResult,int routeNum){
             List<LatLng> linePoints = new ArrayList<>();//路线上点的集合
             //百度地图的一条路线分为路段，getAllStep就是得到一条路线的所有路段，
             // 然后再一条路段上用getWayPoints路段的点，点一般为转弯处或者交叉路口
@@ -966,17 +1026,17 @@ public class Passenger extends AppCompatActivity {
                             ,drivingRouteResult.getRouteLines().get(routeNum).getAllStep().get(i).getWayPoints().get(j).longitude);
                     linePoints.add(node);//将点添加到集合上
                 }
-                OverlayOptions ooPolyLine = new PolylineOptions().width(12).color(Color.YELLOW).points(linePoints);//设置折线的属性,颜色等
-                Polyline polyline = (Polyline) baiduMap.addOverlay(ooPolyLine);//添加到地图
-                lines.add(polyline);
-                Log.d("lines有",lines.size()+"根");
-                if(lines.size()>1){
-                    for(int len = 0;len < lines.size()-1;len++){
-                        Log.d("Line"+len,"设置为不可见");
-                        lines.get(len).setVisible(false);
-                    }
+            }
+            Log.d("画线","run");
+            OverlayOptions ooPolyLine = new PolylineOptions().width(12).color(Color.YELLOW).points(linePoints);//设置折线的属性,颜色等
+            Polyline polyline = (Polyline) baiduMap.addOverlay(ooPolyLine);//添加到地图
+            lines.add(polyline);
+            Log.d("lines有",lines.size()+"根");
+            if(lines.size()>1){
+                for(int len = 0;len < lines.size()-1;len++){
+                    Log.d("Line"+len,"设置为不可见");
+                    lines.get(len).setVisible(false);
                 }
-
             }
         }
     }
@@ -1006,7 +1066,7 @@ public class Passenger extends AppCompatActivity {
 
         @Override
         public boolean onMarkerClick(Marker marker) {
-            Toast.makeText(getApplicationContext(),"标记监听",Toast.LENGTH_SHORT).show();
+
             final LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
             View view = inflater.inflate(R.layout.on_road_pandd, null);
             view.setBackgroundResource(R.drawable.icon_info_background);
@@ -1066,10 +1126,9 @@ public class Passenger extends AppCompatActivity {
                         }
                     });
                     final AlertDialog dialog = new AlertDialog.Builder(Passenger.this)
-                            .setTitle("乘客信息")
+                            .setTitle("司机信息")
                             .setView(view)
                             .create();
-                    dialog.setTitle("用户乘客");
                     dialog.setCanceledOnTouchOutside(false);
                     dialog.show();
                     cancel.setOnClickListener(new View.OnClickListener() {
@@ -1078,7 +1137,6 @@ public class Passenger extends AppCompatActivity {
                             dialog.dismiss();
                         }
                     });
-                    Toast.makeText(getApplicationContext(),"司机",Toast.LENGTH_SHORT).show();
                 }else {
                     view = inflater.inflate(R.layout.on_road_pandd,null);
                     view.setBackgroundResource(R.drawable.icon_info_background);
@@ -1205,8 +1263,12 @@ public class Passenger extends AppCompatActivity {
                 String content = ((EMTextMessageBody) messages.get(i).getBody()).getMessage();
                 Log.d("信息内容",content);
                 if (content.split(",")[0].equals("start")){
+                    Log.d("start","出发信息");
+                    if(onRoadPassengers.size()!=0){
+                        driverInfo.setVisibility(View.VISIBLE);
+                    }
                     //如果标志位是start,则代表司机出发,这里非UI线程不能用Toast,所以用了Handle
-                    baiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(17));//设置缩放比例
+                    baiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(16));//设置缩放比例
                     Double lat = Double.parseDouble(content.split(",")[1]);
                     Double lng = Double.parseDouble(content.split(",")[2]);
                     OverlayOptions options = new MarkerOptions().position(new LatLng(lat,lng)).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_near));
@@ -1214,9 +1276,10 @@ public class Passenger extends AppCompatActivity {
                     Message message = new Message();
                     message.what = 1;
                     UIHandler.sendMessage(message);
-                }
-                if (content.split(",")[0].equals("location")){
+                    break;
+                }else if (content.split(",")[0].equals("location")){
                     //如果是location,代表司机的位置
+                    Log.d("location","位置信息");
                     Message message = new Message();
                     message.what = 4;
                     UIHandler.sendMessage(message);
@@ -1227,8 +1290,10 @@ public class Passenger extends AppCompatActivity {
                     //将司机位置和乘客之间的路线呈现在地图上
                     //第一个参数代表自己的位置(测试点),第二个参数代表司机的位置,是传过来的,第三个是途径点,这里设为空
                     startGo(new LatLng(27.899096,112.923213),new LatLng(lat,lng),new ArrayList<PlanNode>());
-                }
-                if (( content.split(",")[0].equals("arrive"))){
+                    break;
+                }else if (( content.split(",")[0].equals("arrive"))){
+                    Log.d("arrive","达到信息");
+                    driverInfo.setVisibility(View.INVISIBLE);
                     Bundle bundle = new Bundle();
                     bundle.putString(PayFragment.EXTRA_CONTENT, "这次乘车需支付：¥ " + ( content.split(",")[1]));
                     fragment = new PayFragment();
@@ -1236,7 +1301,24 @@ public class Passenger extends AppCompatActivity {
                     fragment.setPaySuccessCallBack(new InputCallback());
                     fragment.show(getSupportFragmentManager(), "Pay");
                     break;
+                }else{
+                    Log.d("其他","聊天信息");
+                    try {
+                        Intent intent = new Intent(Passenger.this,Chatting.class);
+                        intent.putExtra("message",content);
+                        for (int j = 0;j < onRoadPassengers.size();i++){
+                            if(onRoadPassengers.get(i).getString("supplycar").equals("1")){
+                                intent.putExtra("destinationTel",onRoadPassengers.get(i).getString("userid"));
+                                break;
+                            }
+                        }
+                        startActivity(intent);
+                        break;
+                    }catch (JSONException w){
+                        Log.d("JSonException",w.getMessage());
+                    }
                 }
+
             }
         }
 
@@ -1252,12 +1334,10 @@ public class Passenger extends AppCompatActivity {
 
         @Override
         public void onMessageDelivered(List<EMMessage> messages) {
-
         }
 
         @Override
         public void onMessageChanged(EMMessage message, Object change) {
-
         }
     }
     /*

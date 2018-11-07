@@ -1351,8 +1351,6 @@ public class Driver extends AppCompatActivity {
                     break;
             }
         }
-
-
     }
     /*
     * 标注点击
@@ -1397,6 +1395,7 @@ public class Driver extends AppCompatActivity {
                         public void onClick(View v){
                             Intent intent = new Intent(Driver.this,Chatting.class);
                             intent.putExtra("destinationTel",telephoneNumber);
+                            startActivity(intent);
                         }
                     });
                     final AlertDialog dialog = new AlertDialog.Builder(Driver.this)

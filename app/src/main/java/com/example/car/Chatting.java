@@ -65,6 +65,15 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
         signUp();
         initEvents();
         addListener();
+        addInfoIfExits();
+    }
+
+    public void addInfoIfExits(){
+        String content = getIntent().getStringExtra("message");
+        if(content!=null){
+            Log.d("信息",content);
+            msgList.add(new Msg(content, Msg.TYPE_RECIEVED));
+        }
     }
 
     public void addListener() {
@@ -102,7 +111,6 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
                     public void onSuccess() {
                         Log.d("登录成功","--");
                     }
-
                     @Override
                     public void onError(int code, String error) {
                         Log.d("登录错误","--");
