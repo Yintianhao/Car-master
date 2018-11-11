@@ -34,7 +34,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import Tool.TimeCounter;
+import Util.TimeCounter;
 import cn.smssdk.SMSSDK;
 
 import cn.smssdk.EventHandler;

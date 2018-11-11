@@ -1,6 +1,5 @@
 package com.example.car;
 
-import android.app.Notification;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,7 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -48,7 +46,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-import Tool.Const;
+import Util.Const;
 
 //实现TakePhoto.TakeResultListener, InvokeListener接口
 public class Setting extends AppCompatActivity implements TakePhoto.TakeResultListener, InvokeListener {

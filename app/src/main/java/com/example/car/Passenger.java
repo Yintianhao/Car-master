@@ -31,7 +31,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -99,9 +98,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import Tool.Const;
-import Tool.MD5;
-import Tool.StarBar;
+import Util.Const;
+import Util.MD5;
+import Util.StarBar;
 import WheelView.Adapter.NumericWheelAdapter;
 import WheelView.WheelView;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -630,7 +629,7 @@ public class Passenger extends AppCompatActivity {
     * @param end 终点坐标
     * @param wayPoints 途径点
     * */
-    public void startGo(LatLng start,LatLng end,List<PlanNode> wayPoints){
+    public void  startGo(LatLng start,LatLng end,List<PlanNode> wayPoints){
         Log.d("startGo","run");
         try{
             PlanNode begin = PlanNode.withLocation(start);
@@ -1215,6 +1214,12 @@ public class Passenger extends AppCompatActivity {
             //判断点击了哪个item
             switch (item.getItemId()){
                 //支付密码设置
+                case R.id.nav_sos:
+                    startActivity(new Intent(Intent.ACTION_DIAL,Uri.parse("tel:"+110)));
+                    break;
+                case R.id.student_identify:
+                    startActivity(new Intent(Passenger.this,Identity.class));
+                    break;
                 case R.id.pay_setting:
                     startActivity(new Intent(Passenger.this,PaySetting.class));
                     break;

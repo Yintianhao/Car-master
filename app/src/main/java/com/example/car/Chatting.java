@@ -1,8 +1,5 @@
 package com.example.car;
 
-import android.content.Intent;
-import android.icu.text.LocaleDisplayNames;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -13,26 +10,18 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.MultiAutoCompleteTextView;
-import android.widget.Toast;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.EMMessageListener;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.chat.EMTextMessageBody;
-import com.hyphenate.util.EasyUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import Tool.Const;
-import Tool.Msg;
-import Tool.MsgAdapter;
+import Util.Msg;
+import Util.MsgAdapter;
 
 public class Chatting extends AppCompatActivity implements View.OnClickListener, EMMessageListener {
 

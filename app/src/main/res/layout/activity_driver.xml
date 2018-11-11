@@ -18,13 +18,22 @@
             android:theme="@style/ThemeOverlay.AppCompat.Light"/>
         <!--?attr/colorPrimary-->
         <android.support.design.widget.FloatingActionButton
-            android:id="@+id/driver_setTraffic"
+            android:id="@+id/driver_order_list"
             app:backgroundTint="#87CEFF"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_marginRight="30dp"
-            android:layout_marginBottom="230dp"
+            android:layout_marginBottom="180dp"
+            android:src="@drawable/refresh_passenger"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/driver_setTraffic"
+            app:backgroundTint="#87CEFF"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_marginLeft="30dp"
+            android:layout_marginBottom="30dp"
             android:src="@drawable/icon_traffic"/>
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/driver_start"
@@ -32,7 +41,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layout_margin="30dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="30dp"
             android:src="@drawable/icon_home_route"/>
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/driver_refreshPassenger"
@@ -41,8 +51,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_marginRight="30dp"
-            android:layout_marginBottom="100dp"
-            android:src="@drawable/refresh_passenger"/>
+            android:layout_marginBottom="80dp"
+            android:src="@drawable/icon_nearby"/>
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/driver_onRoadPassenger"
             app:backgroundTint="#87CEFF"
@@ -50,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_marginRight="30dp"
-            android:layout_marginBottom="170dp"
+            android:layout_marginBottom="130dp"
             android:src="@drawable/icon_onroadpassenger"/>
         <com.baidu.mapapi.map.MapView
             android:id="@+id/driver_mapView"

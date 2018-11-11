@@ -1,9 +1,7 @@
-package Tool;
+package Util;
 
 import android.support.v7.app.AppCompatActivity;
-import android.widget.TextView;
 
-import com.baidu.location.BDLocation;
 import com.baidu.mapapi.model.LatLng;
 
 import java.util.ArrayList;

@@ -1,7 +1,6 @@
 package com.example.car;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,7 +24,6 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -55,7 +53,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
-import com.autonavi.ae.pos.GpsInfo;
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
@@ -97,7 +94,6 @@ import com.baidu.mapapi.search.route.PlanNode;
 import com.baidu.mapapi.search.route.RoutePlanSearch;
 import com.baidu.mapapi.search.route.TransitRouteResult;
 import com.baidu.mapapi.search.route.WalkingRouteResult;
-import com.google.gson.JsonIOException;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMMessage;
@@ -112,11 +108,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import Tool.Const;
-import Tool.GPSConvert;
-import Tool.MatchRecord;
-import Tool.MyPoi;
-import Tool.NearbyPassengerAdapter;
+import Util.Const;
+import Util.GPSConvert;
+import Util.GateLatLng;
+import Util.MatchRecord;
+import Util.MyPoi;
+import Util.NearbyPassengerAdapter;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class Driver extends AppCompatActivity {
@@ -164,6 +161,7 @@ public class Driver extends AppCompatActivity {
     FloatingActionButton setTraffic;
     List<Boolean> isTraffic;
     int clickNum = 0;
+    FloatingActionButton refreshOrder;
 
     /*
     * UIhandler
@@ -262,6 +260,7 @@ public class Driver extends AppCompatActivity {
         isTraffic = new ArrayList<>();
         isTraffic.add(false);
         isTraffic.add(true);
+        refreshOrder = (FloatingActionButton)findViewById(R.id.driver_order_list);
     }
 
     /*
@@ -287,6 +286,7 @@ public class Driver extends AppCompatActivity {
         searchOnRoad.setOnClickListener(new ViewClickListener());
         baiduMap.setOnMapClickListener(new MapClickListener());
         setTraffic.setOnClickListener(new ViewClickListener());
+        refreshOrder.setOnClickListener(new ViewClickListener());
     }
 
     /*
@@ -882,6 +882,28 @@ public class Driver extends AppCompatActivity {
     }
 
     /*
+    * 获得离司机当前位置最近的学校的门的信息
+    * @param start 起点坐标
+    * */
+    public GateLatLng destinationGateLatLng(LatLng start){
+        //北门112.916586,27.904829
+        //南门112.92282,27.893114
+        //东门112.926403,27.904928
+        //返回隔司机当前位置最近的一个门的坐标
+        double startLat = start.latitude;
+        double startLng = start.longitude;
+        double lenN = (startLat-27.904829)*(startLat-27.904829)+(startLng-112.916586)*(startLng-112.916586);
+        double lenS = (startLat-27.893114)*(startLat-27.893114)+(startLng-112.92282)*(startLng-112.92282);
+        double lenE = (startLat-27.904928)*(startLat-27.904928)+(startLng-112.926403)*(startLng-112.926403);
+        if (Math.min(lenE,lenN)>lenS){
+            return new GateLatLng(2,new LatLng(27.893114,112.92282));
+        }else if(Math.min(lenE,lenS)>lenN){
+            return new GateLatLng(113,new LatLng(27.904829,112.916586));
+        }else {
+            return new GateLatLng(62,new LatLng(27.904928,112.926403));
+        }
+    }
+    /*
     * 初始化InfoWindow(或弃用)
     * */
     public void initInfoWindow(LatLng node,String info){
@@ -1303,6 +1325,9 @@ public class Driver extends AppCompatActivity {
         @Override
         public void onClick(View v){
             switch (v.getId()){
+                case R.id.driver_order_list:
+                    //获得订单列表
+                    break;
                 case R.id.driver_setTraffic:
                     clickNum++;
                     baiduMap.setTrafficEnabled(isTraffic.get(clickNum%2));
@@ -1320,7 +1345,7 @@ public class Driver extends AppCompatActivity {
                     }
                     break;
                 case R.id.driver_start:
-                    startGo(start,end);
+                    //startGo(start,end);
                     List<Poi> wayList = new ArrayList();//途径点目前最多支持3个。
                     try{
                         if (onRoadPassengers!=null&&onRoadPassengers.size()!=0){
@@ -1344,7 +1369,6 @@ public class Driver extends AppCompatActivity {
                     baiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(13));
                     break;
                 case R.id.driver_refreshPassenger:
-                    baiduMap.clear();
                     getNearbyCar("1365743316","27.90553","112.92297");
                     break;
                 default:

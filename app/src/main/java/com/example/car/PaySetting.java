@@ -7,12 +7,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import Tool.MD5;
+import Util.MD5;
 import payUI.PayFragment;
 import payUI.PayPwdView;
 

@@ -61,7 +61,7 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="match_parent">
-            <Tool.StarBar
+            <Util.StarBar
                 android:layout_weight="1"
                 android:id="@+id/driver_star"
                 android:layout_width="0dp"

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    <!--学生信息认证界面-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+        <TextView
+            android:text="姓名:"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_width="80dp"
+            android:layout_height="match_parent" />
+        <EditText
+            android:text="殷天豪"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:maxLines="1"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+        <TextView
+            android:text="学校:"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_width="80dp"
+            android:layout_height="match_parent" />
+        <EditText
+            android:text="湖南科技大学"
+            android:textSize="18sp"
+            android:layout_width="140dp"
+            android:layout_height="match_parent"
+            android:maxLines="1"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+        <TextView
+            android:text="学号:"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_width="80dp"
+            android:layout_height="match_parent" />
+        <EditText
+            android:text="1605050212"
+            android:textSize="18sp"
+            android:layout_width="120dp"
+            android:layout_height="match_parent"
+            android:maxLines="1"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+        <TextView
+            android:text="身份证:"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_width="80dp"
+            android:layout_height="match_parent" />
+        <EditText
+            android:text="430681199807132912"
+            android:textSize="18sp"
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:maxLines="1"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="20dp">
+        <TextView
+            android:gravity="center"
+            android:text="身份证照片"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+        <TextView
+            android:gravity="center"
+            android:text="学生证照片"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="250dp">
+        <ImageView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:src ="@drawable/icon_identity_camera"
+            android:scaleType="center"/>
+        <ImageView
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:src ="@drawable/icon_identity_camera"
+            android:scaleType="center"/>
+    </LinearLayout>
+    <Button
+        android:text="提交审核"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content" />
+</LinearLayout>

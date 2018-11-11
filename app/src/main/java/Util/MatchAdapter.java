@@ -1,4 +1,4 @@
-package Tool;
+package Util;
 
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
@@ -9,8 +9,6 @@ import android.widget.TextView;
 
 import com.example.car.Chatting;
 import com.example.car.R;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
 

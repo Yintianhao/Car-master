@@ -10,7 +10,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.TextView;
 
 import com.baidu.mapapi.SDKInitializer;
 import com.hyphenate.chat.EMClient;
@@ -19,7 +18,7 @@ import com.hyphenate.chat.EMOptions;
 import java.util.Iterator;
 import java.util.List;
 
-import Tool.BeautyTextView;
+import Util.BeautyTextView;
 
 public class Welcome extends AppCompatActivity {
 

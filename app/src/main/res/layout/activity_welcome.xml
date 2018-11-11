@@ -6,7 +6,7 @@
     android:background="#C387CEFA"
     android:gravity="center_horizontal">
 
-    <Tool.BeautyTextView
+    <Util.BeautyTextView
         android:id="@+id/welcome_text"
         android:layout_width="300dp"
         android:layout_height="100dp"

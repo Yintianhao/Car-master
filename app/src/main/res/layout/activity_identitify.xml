@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:background="#C387CEFA">
+
+    <!--学生信息认证界面-->
+    <LinearLayout
+        android:layout_marginTop="40dp"
+        android:layout_width="match_parent"
+        android:layout_height="20dp">
+        <TextView
+            android:gravity="center"
+            android:text="状态:"
+            android:layout_width="80dp"
+            android:layout_height="match_parent" />
+        <TextView
+            android:id="@+id/identity_status"
+            android:layout_width="200dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+        <TextView
+            android:text="姓名:"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_width="80dp"
+            android:layout_height="match_parent" />
+        <EditText
+            android:id="@+id/identity_name"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:maxLines="1"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+        <TextView
+            android:text="学校:"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_width="80dp"
+            android:layout_height="match_parent" />
+        <EditText
+            android:id="@+id/identity_school"
+            android:textSize="18sp"
+            android:layout_width="140dp"
+            android:layout_height="match_parent"
+            android:maxLines="1"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+        <TextView
+            android:text="学号:"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_width="80dp"
+            android:layout_height="match_parent" />
+        <EditText
+            android:id="@+id/identity_stu_num"
+            android:textSize="18sp"
+            android:layout_width="120dp"
+            android:layout_height="match_parent"
+            android:maxLines="1"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+        <TextView
+            android:text="身份证:"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_width="80dp"
+            android:layout_height="match_parent" />
+        <EditText
+            android:id="@+id/identity_id_card"
+            android:textSize="18sp"
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:maxLines="1"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="20dp">
+        <TextView
+            android:gravity="center"
+            android:text="身份证照片"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:textSize="12sp"
+            android:layout_height="match_parent" />
+        <TextView
+            android:gravity="center"
+            android:text="学生证照片"
+            android:textSize="12sp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:gravity="center_horizontal">
+        <TextView
+            android:gravity="center"
+            android:layout_width="100dp"
+            android:textSize="12sp"
+            android:layout_height="match_parent"
+            android:background="#C3D3D3D3"
+            android:layout_marginRight="50dp"/>
+        <TextView
+            android:gravity="center"
+            android:textSize="12sp"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:background="#C3D3D3D3"
+            android:layout_marginLeft="50dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+        <ImageView
+            android:id="@+id/photo_id_card"
+            android:layout_weight="30"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:src ="@drawable/icon_identity_camera"
+            android:scaleType="center"
+            android:clickable="true"/>
+        <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:background="#C3D3D3D3">
+            </LinearLayout>
+        </LinearLayout>
+        <ImageView
+            android:id="@+id/photo_stu_card"
+            android:layout_weight="30"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:src ="@drawable/icon_identity_camera"
+            android:scaleType="center"
+            android:clickable="true"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:gravity="center_horizontal">
+        <TextView
+            android:gravity="center"
+            android:layout_width="100dp"
+            android:textSize="12sp"
+            android:layout_height="match_parent"
+            android:background="#C3D3D3D3"
+            android:layout_marginRight="50dp"/>
+        <TextView
+            android:gravity="center"
+            android:textSize="12sp"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:background="#C3D3D3D3"
+            android:layout_marginLeft="50dp"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/identity_summit"
+        android:text="提交审核"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="160dp"
+        android:layout_height="40dp"
+        android:background="#C3D3D3D3"/>
+</LinearLayout>

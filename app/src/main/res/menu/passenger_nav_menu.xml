@@ -15,6 +15,15 @@
             android:icon="@drawable/ic_setting"
             android:title="支付设置"/>
         <item
+            android:id="@+id/student_identify"
+            android:icon="@drawable/icon_identity_item"
+            android:title="身份认证"/>
+
+        <item
+            android:id="@+id/nav_sos"
+            android:icon="@drawable/icon_sos"
+            android:title="紧急求助"/>
+        <item
             android:id="@+id/nav_about"
             android:icon="@drawable/ic_about"
             android:title="关于我们"/>

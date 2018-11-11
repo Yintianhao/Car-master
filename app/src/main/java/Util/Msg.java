@@ -1,4 +1,4 @@
-package Tool;
+package Util;
 
 /**
  * Created by 31786 on 2018/5/15.

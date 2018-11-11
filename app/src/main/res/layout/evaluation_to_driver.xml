@@ -22,7 +22,7 @@
             android:textColor="#0000FF"
             android:textSize="18sp" />
 
-        <Tool.StarBar
+        <Util.StarBar
             android:id="@+id/driver_behavior"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -54,7 +54,7 @@
             android:textColor="#0000FF"
             android:textSize="18sp" />
 
-        <Tool.StarBar
+        <Util.StarBar
             android:id="@+id/driver_car_environ"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -86,7 +86,7 @@
             android:textColor="#0000FF"
             android:textSize="18sp" />
 
-        <Tool.StarBar
+        <Util.StarBar
             android:id="@+id/driver_security"
             android:layout_width="0dp"
             android:layout_height="match_parent"
