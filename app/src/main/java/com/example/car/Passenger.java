@@ -21,12 +21,15 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -62,7 +65,9 @@ import com.baidu.mapapi.map.PolylineOptions;
 import com.baidu.mapapi.map.UiSettings;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.search.core.SearchResult;
+import com.baidu.mapapi.search.geocode.GeoCodeOption;
 import com.baidu.mapapi.search.geocode.GeoCodeResult;
+import com.baidu.mapapi.search.geocode.GeoCoder;
 import com.baidu.mapapi.search.geocode.OnGetGeoCoderResultListener;
 import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 import com.baidu.mapapi.search.poi.OnGetPoiSearchResultListener;
@@ -100,6 +105,8 @@ import java.util.Map;
 
 import Util.Const;
 import Util.MD5;
+import Util.MatchAdapter;
+import Util.MatchRecord;
 import Util.StarBar;
 import WheelView.Adapter.NumericWheelAdapter;
 import WheelView.WheelView;
@@ -126,12 +133,10 @@ public class Passenger extends AppCompatActivity {
     FloatingActionButton inputInformation;
     String startPlace;
     String endPlace;
-    String startTime;
-    String endTime;
-    String supplyCar;
     List<PlanNode> wayPoints = new ArrayList<>();
     LatLng a;
     LatLng b;
+    LatLng start;
     AutoCompleteTextView startInput;
     AutoCompleteTextView endInput;
     WheelView startTimeInput_h;
@@ -157,6 +162,8 @@ public class Passenger extends AppCompatActivity {
     //司机的JSON对象
     JSONObject driverObject;
 
+    //匹配结果
+    List<MatchRecord> records;
     //UI的handle
     private Handler UIHandler = new Handler(){
         @Override
@@ -358,7 +365,7 @@ public class Passenger extends AppCompatActivity {
         /*
         * 得到起点终点,起点经纬度,终点经纬度,后台请求
         * */
-        final AlertDialog setTheOrder = new AlertDialog.Builder(Passenger.this)
+        AlertDialog setTheOrder = new AlertDialog.Builder(Passenger.this)
                 .setView(parent)
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
@@ -383,7 +390,9 @@ public class Passenger extends AppCompatActivity {
                         Log.d("supplyCar-->",supplyCar);
                         Log.d("publishTime-->",getPublishTime());
                         addRequest(Const.userName);*/
-                        addPeopleToMap(Const.userName);
+                        //addPeopleToMap(Const.userName);
+                        addRequest("15211373105");
+                        Log.d("addRequest","run");
                         parent.removeAllViews();
                     }
                 })
@@ -439,38 +448,57 @@ public class Passenger extends AppCompatActivity {
         int minute = c.get(Calendar.MINUTE);
         return String.valueOf(year+"-"+month+"-"+day+"-"+hour+"-"+minute+"-00");
     }
-    /*
+    /**
     * 添加请求
     * @param accountNumber 手机号即账号
     * */
     public void addRequest(final String accountNumber){
-        /*
-        * 添加拼车请求
-        * */
+
+
         //请求地址
-        String url = "http://47.106.72.170:8080/MyCarSharing/addcommuterequest.action";
+        String url = "http://47.106.72.170:8080/MyCarSharing/orderRequest2.action?userid=15211373105&startplacex=112.928886&startplacey=27.904449&destinationx=112.919487" +
+                "&destinationy=27.881441&startdate=2018-9-2-9-00-00&enddate=2018-9-2-9-30-00";
         String tag = "addRequest";
+
         //取得请求队列
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+
         //防止重复请求，所以先取消tag标识的请求队列
         requestQueue.cancelAll(tag);
+
         //创建StringRequest，定义字符串请求的请求方式为POST(省略第一个参数会默认为GET方式)
-        final MyStringRequest request = new MyStringRequest(Request.Method.POST, url,
+        MyStringRequest request = new MyStringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            if(jsonObject.getBoolean("result")){
-                                Toast.makeText(getApplicationContext(),"添加请求成功,马上为您查找匹配的用户",Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(Passenger.this, MatchShow.class));
-                            }else {
-                                Toast.makeText(getApplicationContext(),"添加请求失败,请检查您的网络设置",Toast.LENGTH_SHORT).show();
+                            JSONArray jsonArray = new JSONObject(response).getJSONArray("result");
+                            if(jsonArray.length()!=0){
+                                Log.d("Json Array length",jsonArray.length()+"");
+                                for(int i = 0;i < jsonArray.length();i++){
+                                    records.add(new MatchRecord(jsonArray.getJSONObject(i)));
+                                }
+                                if(records.size()!=0) {
+                                    LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+                                    LinearLayout parent = (LinearLayout) inflater.inflate(R.layout.activity_match_show, null);
+                                    RecyclerView recyclerView = (RecyclerView)parent.findViewById(R.id.match_record);
+                                    RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(Passenger.this);
+                                    recyclerView.setLayoutManager(layoutManager);
+                                    MatchAdapter matchAdapter = new MatchAdapter(records);
+                                    recyclerView.setAdapter(matchAdapter);
+                                    AlertDialog alertDialog = new AlertDialog.Builder(Passenger.this)
+                                            .setView(parent)
+                                            .create();
+                                    alertDialog.show();
+                                    WindowManager.LayoutParams layoutParams = alertDialog.getWindow().getAttributes();
+                                    layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+                                    layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                                    alertDialog.getWindow().setAttributes(layoutParams);
+                                }
                             }
                         } catch (JSONException e) {
                             //做自己的请求异常操作，如Toast提示（“无网络连接”等）
                             Log.d("JSONException--->",e.getMessage());
-                            Toast.makeText(getApplicationContext(),"无网络连接",Toast.LENGTH_SHORT).show();
                         }
                     }
                 }, new Response.ErrorListener() {
@@ -483,29 +511,33 @@ public class Passenger extends AppCompatActivity {
         }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-                Log.d("startLatLng-->",String.valueOf(getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("startLatLng","")));
-                String startplacex = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("startLatLng","").split(",")[0];
-                String startplacey = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("startLatLng","").split(",")[1];
-                String destinationx = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("endLatLng","").split(",")[0];
-                String destinationy = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("endLatLng","").split(",")[1];
-                String start_place = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("startPlace","");
-                String end_place = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("endPlace","");
-                String start_time = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("startTime","");
-                String end_time = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("endTime","");
-                String supply_car = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("supplyCar","");
-                String publish_time = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("publishTime","");
+                /**
+                 * 参数名	类型
+                 userid	字符串
+                 startplacex	浮点数,出发地经度
+                 startplacey	浮点数,出发地纬度
+                 destinationx	浮点数,目的地经度
+                 destinationy	浮点数,目的地纬度
+                 startdate	字符串,格式为yyyy-MM-dd-HH-mm-ss ,最早出发时间
+                 enddate	字符串,格式为yyyy-MM-dd-HH-mm-ss ,最晚出发时间
+                 * */
                 Map<String,String> params = new HashMap<>();
+                /*
+                * String startplacey = String.valueOf(start.latitude);
+                String startplacex = String.valueOf(start.longitude);
+                LatLng destination = getDestination(endInput.getText().toString());
+                String destinationy = String.valueOf(destination.latitude);
+                String destinationx = String.valueOf(destination.longitude);
+                String startTime = "2018-9-2-9-00-00";
+                String endTime = "2018-9-2-9-30-00";
                 params.put("userid", accountNumber);  //注⑥
                 params.put("startplacex",startplacey);
                 params.put("startplacey",startplacex);
-                params.put("startplace",start_place);
                 params.put("destinationx",destinationy);
                 params.put("destinationy",destinationx);
-                params.put("destination",end_place);
-                params.put("supplycar",supply_car);
-                params.put("startdate",start_time);
-                params.put("enddate",end_time);
-                params.put("pulishtime",getPublishTime());
+                params.put("startdate",startTime);
+                params.put("enddate",endTime);
+                * */
                 return params;
             }
 
@@ -623,7 +655,17 @@ public class Passenger extends AppCompatActivity {
         //将请求添加到队列中
         requestQueue.add(request);
     }
-    /*
+
+    /**
+     * 获得目的地的经纬度
+     * */
+    public LatLng getDestination(String endPlace){
+        GeoCoder coder = GeoCoder.newInstance();
+        GeoCoderResultListener listener = new GeoCoderResultListener();
+        coder.geocode(new GeoCodeOption().city("湘潭市").address(endPlace));
+        return listener.getEndLatLng();
+    }
+    /**
     * 开始出发,由终点起点画线
     * @param start 起点坐标
     * @param end 终点坐标
@@ -754,6 +796,7 @@ public class Passenger extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         signDown();
+
         EMClient.getInstance().chatManager().removeMessageListener(new MessageListener());
         if(routePlanSearch!=null){
             routePlanSearch.destroy();
@@ -813,7 +856,7 @@ public class Passenger extends AppCompatActivity {
     /*
     * 请求字符串编码转换
     * */
-    static class MyStringRequest extends StringRequest {
+    public static class MyStringRequest extends StringRequest {
 
         public MyStringRequest(int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
             super(method, url, listener, errorListener);
@@ -933,6 +976,7 @@ public class Passenger extends AppCompatActivity {
                 double longitude = location.getLongitude();
                 LatLng center = new LatLng(latitude,longitude);
                 Const.location = center;
+                start = new LatLng(latitude,longitude);
                 MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(Const.location);
                 baiduMap.animateMapStatus(update);
                 MarkerOptions options = new MarkerOptions().position(center).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_mylocation));
@@ -960,8 +1004,10 @@ public class Passenger extends AppCompatActivity {
                     showDriverDialog(onRoadPassengers);
                     break;
                 case R.id.passenger_passenger_start:
-                    initDialogEvents();
+                    //initDialogEvents();
+                    records = new ArrayList<>();
                     setOrderDialog();
+                    Log.d("Record size = ",records.size()+"");
                     break;
                 case R.id.passenger_passenger_setTraffic:
                     clickNum++;
@@ -1044,9 +1090,13 @@ public class Passenger extends AppCompatActivity {
     * */
     private class GeoCoderResultListener implements OnGetGeoCoderResultListener{
 
+        LatLng endLatLng;
         @Override
         public void onGetGeoCodeResult(GeoCodeResult geoCodeResult) {
-
+            if (geoCodeResult==null || geoCodeResult.error != SearchResult.ERRORNO.NO_ERROR){
+            }else {
+                endLatLng = geoCodeResult.getLocation();
+            }
         }
         @Override
         public void onGetReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
@@ -1056,6 +1106,10 @@ public class Passenger extends AppCompatActivity {
             }else {
                 latestLocationInfo.setText("您的位置:"+reverseGeoCodeResult.getAddressDetail().city+reverseGeoCodeResult.getAddressDetail().district+reverseGeoCodeResult.getAddressDetail().street);
             }
+        }
+
+        public LatLng getEndLatLng() {
+            return endLatLng;
         }
     }
     /*

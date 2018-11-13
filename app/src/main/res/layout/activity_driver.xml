@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_marginRight="30dp"
-            android:layout_marginBottom="180dp"
+            android:layout_marginBottom="260dp"
             android:src="@drawable/refresh_passenger"/>
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/driver_setTraffic"
@@ -51,8 +51,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_marginRight="30dp"
-            android:layout_marginBottom="80dp"
-            android:src="@drawable/icon_nearby"/>
+            android:layout_marginBottom="110dp"
+            android:src = "@drawable/icon_distance"/>
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/driver_onRoadPassenger"
             app:backgroundTint="#87CEFF"
@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_marginRight="30dp"
-            android:layout_marginBottom="130dp"
+            android:layout_marginBottom="180dp"
             android:src="@drawable/icon_onroadpassenger"/>
         <com.baidu.mapapi.map.MapView
             android:id="@+id/driver_mapView"

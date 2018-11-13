@@ -21,6 +21,25 @@ public class MatchRecord {
     String distanceBefore;
     String distanceAfter;
     String carNumber;
+    String commonPickLat;
+    String commonPickLng;
+
+    public String getCommonPickLat() {
+        return commonPickLat;
+    }
+
+    public void setCommonPickLat(String commonPickLat) {
+        this.commonPickLat = commonPickLat;
+    }
+
+    public String getCommonPickLng() {
+        return commonPickLng;
+    }
+
+    public void setCommonPickLng(String commonPickLng) {
+        this.commonPickLng = commonPickLng;
+    }
+
     public MatchRecord(JSONObject jsonObject){
         try{
             setName(jsonObject.getString("name"));
@@ -34,6 +53,8 @@ public class MatchRecord {
             setMoneyBefore(String.valueOf(jsonObject.getDouble("spendMoney")));
             setMoneyAfter(String.valueOf(jsonObject.getDouble("sharingMoney")));
             setCarNumber(String.valueOf(jsonObject.getString("carnum")));
+            setCommonPickLat(String.valueOf(jsonObject.getString("commPickLat")));
+            setCommonPickLng(String.valueOf(jsonObject.getString("commPickLng")));
             Log.d("JsonObject----->",jsonObject.getString("name")+jsonObject.getString("userid"));
         }catch (JSONException e){
             Log.d("JsonException----->",e.getMessage());

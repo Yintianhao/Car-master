@@ -62,6 +62,9 @@ public class Identity extends AppCompatActivity implements TakePhoto.TakeResultL
         init();
         showInfoIfExits();
     }
+    /*
+    * 初始化
+    * */
     public void init(){
         //控件
         idCardPhoto = (ImageView)findViewById(R.id.photo_id_card);
@@ -85,6 +88,9 @@ public class Identity extends AppCompatActivity implements TakePhoto.TakeResultL
         sharedPreferences = getSharedPreferences("Setting",MODE_MULTI_PROCESS);
         editor = sharedPreferences.edit();
     }
+    /*
+    * 如果之前申请验证过,则加载之前的信息
+    * */
     public void showInfoIfExits(){
         String idImage = "";
         String stuImage = "";
@@ -106,6 +112,7 @@ public class Identity extends AppCompatActivity implements TakePhoto.TakeResultL
 
             }
             else{
+                //等待管理员审核,其余控件设置不可点击
                 status.setText("等待管理员审核...");
                 status.setTextColor(Color.RED);
                 name.setClickable(false);
@@ -151,9 +158,10 @@ public class Identity extends AppCompatActivity implements TakePhoto.TakeResultL
         }
         return type;
     }
-
+    /**
+     * 获得TakePhoto实例
+     * */
     public TakePhoto getTakePhoto() {
-        //获得TakePhoto实例
         if (takePhoto == null) {
             takePhoto = (TakePhoto) TakePhotoInvocationHandler.of(this).bind(new TakePhotoImpl(this, this));
         }
@@ -162,9 +170,11 @@ public class Identity extends AppCompatActivity implements TakePhoto.TakeResultL
         return takePhoto;
     }
 
+    /**
+     * 获取照片成功
+     * */
     @Override
     public void takeSuccess(final TResult result) {
-        //获取照片成功
         Toast.makeText(Identity.this,"成功",Toast.LENGTH_SHORT).show();
         File file = new File(result.getImage().getOriginalPath());
         if(file.exists()){
@@ -198,6 +208,9 @@ public class Identity extends AppCompatActivity implements TakePhoto.TakeResultL
     public void takeCancel() {
         //取消
     }
+    /*
+    * 点击监听器
+    * */
     private class ViewClickListener implements View.OnClickListener{
         @Override
         public void onClick(View view) {

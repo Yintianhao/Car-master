@@ -61,6 +61,9 @@ public class RegisterOfPassenger extends AppCompatActivity implements View.OnCli
         addListener();
         initHandler();
     }
+    /**
+     * 初始化控件
+     * */
     public void initEvents(){
         //初始化SDK 并对每个控件进行绑定
         MobSDK.init(this,appKey,appSecret);
@@ -75,11 +78,17 @@ public class RegisterOfPassenger extends AppCompatActivity implements View.OnCli
         register_userAgree.setClickable(true);
         register_userAgree.getPaint().setFlags(Paint. UNDERLINE_TEXT_FLAG );
     }
+    /**
+     * 添加监听器
+     * */
     public void addListener(){
         codeView.setOnClickListener(this);
         register.setOnClickListener(this);
         register_userAgree.setOnClickListener(this);
     }
+    /*
+    * 初始化Handler
+    * */
     public void initHandler(){
         //初始化Handler
         handler = new MyHandler(this,RegisterOfPassenger.this);
@@ -95,10 +104,16 @@ public class RegisterOfPassenger extends AppCompatActivity implements View.OnCli
         };
         SMSSDK.registerEventHandler(eventHandler);
     }
+    /**
+     * 重写onclick
+     * @param v 被监听的控件
+     * */
     @Override
     public void onClick(View v){
+        //取出ID
         switch (v.getId()){
             case R.id.register_passenger_getCode:
+                //验证码,新版已取消
                 SMSSDK.getVerificationCode("86", userNumber.getText().toString().trim());
                 new TimeCounter(codeView,30000,1000).start();
                 break;
@@ -106,7 +121,7 @@ public class RegisterOfPassenger extends AppCompatActivity implements View.OnCli
                 SMSSDK.submitVerificationCode("86", userNumber.getText().toString(),verificationCode.getText().toString());
                 break;
             case R.id.register_passengerAgree:
-                //Toast.makeText(RegisterOfPassenger.this,"条款",Toast.LENGTH_SHORT).show();
+                //弹出提示
                 AlertDialog toDriver = new AlertDialog.Builder(RegisterOfPassenger.this)
                         .setTitle("我们需要读取你手机的相关信息," +"\n"+
                                 "比如手机状态信息,位置等,我们保证用户隐私," +"\n"+

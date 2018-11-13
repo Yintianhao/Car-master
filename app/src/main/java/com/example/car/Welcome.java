@@ -94,7 +94,6 @@ public class Welcome extends AppCompatActivity {
                     return processName;
                 }
             } catch (Exception e) {
-                // Log.d("Process", "Error>> :"+ e.toString());
             }
         }
         return processName;

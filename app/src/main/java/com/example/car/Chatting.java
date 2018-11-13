@@ -32,6 +32,9 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
     private MsgAdapter adapter;
     private String chatId;//自己传进来的跟自己聊天的人的ID
 
+    /**
+     * handler
+     * */
     private Handler UIHandler = new Handler(){
         @Override
         public void handleMessage(Message msg){
@@ -56,7 +59,9 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
         addListener();
         addInfoIfExits();
     }
-
+    /**
+     * 如果存在那么将信息添加
+     * */
     public void addInfoIfExits(){
         String content = getIntent().getStringExtra("message");
         if(content!=null){
@@ -65,10 +70,16 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
         }
     }
 
+    /**
+     * 添加监听器
+     * */
     public void addListener() {
         send.setOnClickListener(this);
     }
 
+    /*
+    * 退出登录
+    * */
     public void signDown(){
         EMClient.getInstance().logout(false, new EMCallBack() {
             @Override
@@ -88,6 +99,9 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
             }
         });
     }
+    /*
+    * 登录
+    * */
     public void signUp(){
         String tel = getSharedPreferences("Setting", MODE_MULTI_PROCESS).getString("user","");
         String passWord = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("passWord","");
@@ -113,6 +127,9 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
                     }
                 });
     }
+    /*
+    * 初始化控件
+    * */
     public void initEvents() {
         chatId  = getIntent().getStringExtra("destinationTel");
         Log.d("chatId-----",chatId);
@@ -125,6 +142,10 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
         msgViewRecyclerView.setAdapter(adapter);
     }
 
+    /**
+     * @param content 信息内容
+     * @param chatWithId 对方账号
+     * */
     public void sendMessage(String content,String chatWithId) {
         EMMessage message = EMMessage.createTxtSendMessage(content,chatWithId);
 //如果是群聊，设置chattype，默认是单聊
@@ -155,6 +176,10 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
         });
     }
 
+    /**
+     * 重写onClick
+     * @param view 被点击的控件
+     * */
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -176,6 +201,10 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
         }
     }
 
+    /**
+     * 重写onMessageReceived方法
+     * @param messages 收到的信息列表
+     * */
     @Override
     public void onMessageReceived(List<EMMessage> messages) {
         //将恢复的信息加入到消息列表里面并刷新
@@ -212,26 +241,28 @@ public class Chatting extends AppCompatActivity implements View.OnClickListener,
 
     }
 
-
-
     @Override
     public void onResume(){
         super.onResume();
+        //添加消息监听
         EMClient.getInstance().chatManager().addMessageListener(this);
     }
     public void onStop(){
         super.onStop();
+        //移除消息监听
         EMClient.getInstance().chatManager().removeMessageListener(this);
     }
     @Override
     public void onDestroy(){
         super.onDestroy();
+        //移除消息监听
         EMClient.getInstance().chatManager().removeMessageListener(this);
     }
     @Override
     public void onBackPressed(){
         super.onBackPressed();
         signDown();
+        //监听消息监听
         EMClient.getInstance().chatManager().removeMessageListener(this);
     }
 

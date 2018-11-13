@@ -41,6 +41,9 @@ public class PaySetting extends AppCompatActivity {
         testPassWord();
         initEvent();
     }
+    /**
+     * 初始化控件
+     * */
     public void initEvent(){
         passWord = (EditText)findViewById(R.id.pay_setting_newpwd);
         againPassWord = (EditText)findViewById(R.id.pay_setting_againpwd);
@@ -49,6 +52,9 @@ public class PaySetting extends AppCompatActivity {
         sharedPreferences = getSharedPreferences("Setting",MODE_MULTI_PROCESS);
         editor = sharedPreferences.edit();
     }
+    /**
+     * 修改支付密码
+     * */
     public boolean correctPayPassWord(){
         String newPassWord = passWord.getText().toString();
         String againPass = againPassWord.getText().toString();
@@ -64,6 +70,9 @@ public class PaySetting extends AppCompatActivity {
         }
         return false;
     }
+    /**
+    * 检测密码
+    * */
     public void testPassWord(){
         fragment = new PayFragment();
         Bundle bundle = new Bundle();
@@ -73,8 +82,10 @@ public class PaySetting extends AppCompatActivity {
         fragment.setPaySuccessCallBack(new InputCallBack());
         fragment.show(getSupportFragmentManager(), "Pay");
     }
+    /**
+     * 验证结果回调
+     * */
     private class InputCallBack implements PayPwdView.InputCallBack{
-
         @Override
         public void onInputFinish(String result) {
             String oldPassWord = getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("payPassWord","");
@@ -89,6 +100,9 @@ public class PaySetting extends AppCompatActivity {
             }
         }
     }
+    /**
+     * 点击监听
+     * */
     private class ViewClickListener implements View.OnClickListener{
 
         @Override

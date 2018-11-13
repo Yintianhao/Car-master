@@ -66,7 +66,6 @@ public class MatchShow extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         matchAdapter = new MatchAdapter(records);
         recyclerView.setAdapter(matchAdapter);
-        mapView = (MapView)findViewById(R.id.match_mapView);
         baiduMap = mapView.getMap();
         MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(Const.location);
         baiduMap.animateMapStatus(update);

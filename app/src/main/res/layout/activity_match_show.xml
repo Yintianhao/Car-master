@@ -2,28 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-    <com.baidu.mapapi.map.MapView
-        android:id="@+id/match_mapView"
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_alignParentRight="true"
-        android:clickable="true"
-        android:layout_weight="2"/>
-    <LinearLayout
-        android:orientation="vertical"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/match_record"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:text="请求结果(第一位是顺路司机,后面为匹配的合适乘客)"
-            android:gravity="center" />
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/match_record"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-    </LinearLayout>
-
+        android:layout_height="match_parent"/>
 </LinearLayout>

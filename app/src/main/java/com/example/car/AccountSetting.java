@@ -52,6 +52,9 @@ public class AccountSetting extends AppCompatActivity implements ViewGroup.OnCli
         addListener();
         initHandler();
     }
+    /*
+    * 初始化控件
+    * */
     public void initEvents(){
         oldPassword = (EditText)findViewById(R.id.Accountsetting_oldpwd);
         newPassword = (EditText)findViewById(R.id.Accountsetting_newpwd);
@@ -64,10 +67,16 @@ public class AccountSetting extends AppCompatActivity implements ViewGroup.OnCli
         rightVerification = false;
         editor = getSharedPreferences("Setteing",MODE_MULTI_PROCESS).edit();
     }
+    /*
+    * 添加监听器
+    * */
     public void addListener(){
         save.setOnClickListener(this);
         getCode.setOnClickListener(this);
     }
+    /*
+    * 初始化外部handler
+    * */
     public void initHandler() {
         myHandler = new MyHandler(this,AccountSetting.this);
         eventHandler = new EventHandler(){
@@ -82,15 +91,21 @@ public class AccountSetting extends AppCompatActivity implements ViewGroup.OnCli
         };
         SMSSDK.registerEventHandler(eventHandler);
     }
+    /*
+    * 重写监听器方法
+    * @param v 当前被点击的控件
+    * */
     @Override
     public void onClick(View v){
         switch (v.getId()){
             case R.id.Accountsetting_getCode:
+                //获取验证码
                 SMSSDK.getVerificationCode("86", phoneNum);
                 Toast.makeText(this,phoneNum,Toast.LENGTH_SHORT).show();
                 new TimeCounter(getCode,30000,1000).start();
                 break;
             case R.id.Accountsetting_save:
+                //保存信息
                 SMSSDK.submitVerificationCode("86", phoneNum,verification.getText().toString());
                 if(oldPassword.getText().toString()
                         .equals(passWord)){
@@ -108,6 +123,11 @@ public class AccountSetting extends AppCompatActivity implements ViewGroup.OnCli
                 break;
         }
     }
+    /*
+    * 修改个人资料的信息
+    * @param accountNumber 账号
+    * @param passWord 密码
+    * */
     public void changePassword(final String accountNumber, final String password) {
         //请求地址
         String url = "http://47.106.72.170:8080/MyCarSharing/changeinfo.action";
@@ -172,8 +192,9 @@ public class AccountSetting extends AppCompatActivity implements ViewGroup.OnCli
         }
         @Override
         public void handleMessage(Message msg){
-            //对消息进行处理
+
             /*
+            * 对信息进行处理
             * SMSSDK.RESULT_COMPLETE完成
             * SMSSDK.EVENT_SUBMIT_VERIFICATION_CODE 提交成功
             * SMSSDK.EVENT_GET_VERIFICATION_CODE 已经验证

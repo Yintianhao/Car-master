@@ -42,9 +42,15 @@ public class CarSetting extends AppCompatActivity implements View.OnClickListene
         addListener();
         showCarInfo(getSharedPreferences("Setting",MODE_MULTI_PROCESS).getString("user",""));
     }
+    /*
+    * 添加监听器
+    * */
     public void addListener(){
         save.setOnClickListener(this);
     }
+    /*
+    * 初始化控件
+    * */
     public void initEvents(){
         carId = (EditText)findViewById(R.id.carId);
         carBrand = (EditText)findViewById(R.id.carBrand);
@@ -53,8 +59,13 @@ public class CarSetting extends AppCompatActivity implements View.OnClickListene
         save = (TextView)findViewById(R.id.carSettingSave);
         carModel = (EditText)findViewById(R.id.carModel);
     }
+    /**
+     * 重写onClick
+     * @param v 被点击的控件
+     */
     @Override
     public void onClick(View v){
+        //获取点击控件的ID
         switch (v.getId()){
             case R.id.carSettingSave:
                 saveCarInfo();
@@ -63,6 +74,10 @@ public class CarSetting extends AppCompatActivity implements View.OnClickListene
                 break;
         }
     }
+    /**
+     * @param driverId 司机账号
+     * 展示司机的个人信息
+     * */
     public void showCarInfo(final String driverId){
         //请求地址
         String url = "http://47.106.72.170:8080/MyCarSharing/selectcarinfo.action";
@@ -114,6 +129,10 @@ public class CarSetting extends AppCompatActivity implements View.OnClickListene
         //将请求添加到队列中
         requestQueue.add(request);
     }
+    /**
+     *
+     * 保存信息
+     * */
     public void saveCarInfo(){
         //请求地址
         String url = "http://47.106.72.170:8080/MyCarSharing/updatecarinfo.action";

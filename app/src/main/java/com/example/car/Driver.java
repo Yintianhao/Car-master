@@ -36,6 +36,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -114,6 +115,8 @@ import Util.GateLatLng;
 import Util.MatchRecord;
 import Util.MyPoi;
 import Util.NearbyPassengerAdapter;
+import Util.OrderAdapter;
+import Util.OrderRecord;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class Driver extends AppCompatActivity {
@@ -162,7 +165,8 @@ public class Driver extends AppCompatActivity {
     List<Boolean> isTraffic;
     int clickNum = 0;
     FloatingActionButton refreshOrder;
-
+    List<OrderRecord> records;
+    Button get;
     /*
     * UIhandler
     * */
@@ -769,37 +773,7 @@ public class Driver extends AppCompatActivity {
         dialogWindow.setGravity(Gravity.BOTTOM);
         dialogWindow.setAttributes(params);
     }
-    /*
-    * 获得方向信息(弃用)
-    * */
-    public void showDirectionInfo(){
-        try {
-            if(wayNodes.size()==0){
-                Toast.makeText(getApplicationContext(),"请先选择目的地",Toast.LENGTH_SHORT).show();
-            }else {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        for(int i = 0;i < wayNodes.size();i++){
-                            LatLng center = wayNodes.get(i);
-                            MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(center);
-                            baiduMap.animateMapStatus(update);
-                            initInfoWindow(wayNodes.get(i),wayNames.get(i));
-                            try{
-                                Thread.sleep(3000);
-                            }catch (InterruptedException e){
 
-                            }
-                        }
-                        initInfoWindow(end,"确认到达");
-                    }
-                }).start();
-            }
-
-        }catch (NullPointerException r){
-
-        }
-    }
     /*
     * 获得缓存区中的车
     * @param phoneNum 电话号码
@@ -924,18 +898,10 @@ public class Driver extends AppCompatActivity {
         baiduMap.showInfoWindow(infoWindow);
     }
     /*
-    * 获得预测的车(未与后台对接)
+    * 获得订单列表
     * */
-    public void getPredictedCar(){
-        /*
-         * 获得格式化的时间,YY-MM-DD-HH-MM
-         * hour 当前小时 minute 当前分钟 requestSeconds 请求参数
-         *  */
-        Calendar c = Calendar.getInstance();
-        int hour = c.get(Calendar.HOUR_OF_DAY);
-        int minute = c.get(Calendar.MINUTE);
-        int requestSeconds = hour*3600+minute*60;
-        String url = "http://47.106.72.170:8080/";
+    public void getOrders(){
+        String url = "http://47.106.72.170:8080/MyCarSharing/searchAllOrders";
         String tag = "findPredictedCar";
         //取得请求队列
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -946,11 +912,37 @@ public class Driver extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         Log.d("Response",response);
-                        /*try {
-
-                        } catch (JSONException e) {
-                            Log.d("JSON","解析问题");
-                        }*/
+                        records = new ArrayList<>();
+                        records.add(new OrderRecord());
+                        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+                        LinearLayout parent = (LinearLayout) inflater.inflate(R.layout.activity_match_show, null);
+                        RecyclerView recyclerView = (RecyclerView)parent.findViewById(R.id.match_record);
+                        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(Driver.this);
+                        recyclerView.setLayoutManager(layoutManager);
+                        OrderAdapter adapter = new OrderAdapter(records,Driver.this);
+                        recyclerView.setAdapter(adapter);
+                        AlertDialog alertDialog = new AlertDialog.Builder(Driver.this)
+                                .setView(parent)
+                                .setTitle("订单列表")
+                                .create();
+                        alertDialog.show();
+                        WindowManager.LayoutParams layoutParams = alertDialog.getWindow().getAttributes();
+                        layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+                        layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                        alertDialog.getWindow().setAttributes(layoutParams);
+                        OverlayOptions options = new MarkerOptions()
+                                .position(new LatLng(27.90836,112.92749))
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_near));
+                        baiduMap.addOverlay(options);
+                        OverlayOptions option2 = new MarkerOptions()
+                                .position(new LatLng(27.911505,112.92713))
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_near));
+                        baiduMap.addOverlay(option2);
+                        OverlayOptions option3 = new MarkerOptions()
+                                .position(new LatLng(27.898918,112.925995))
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_near));
+                        baiduMap.addOverlay(option3);
+                        startGo(new LatLng(27.899399,112.929271),new LatLng(27.90333,112.928449));
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -1327,6 +1319,7 @@ public class Driver extends AppCompatActivity {
             switch (v.getId()){
                 case R.id.driver_order_list:
                     //获得订单列表
+                    getOrders();
                     break;
                 case R.id.driver_setTraffic:
                     clickNum++;
@@ -1446,4 +1439,5 @@ public class Driver extends AppCompatActivity {
             return true;
         }
     }
+
 }

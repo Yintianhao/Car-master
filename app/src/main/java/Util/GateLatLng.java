@@ -10,6 +10,10 @@ public class GateLatLng {
         gateLatLng = latLng;
     }
 
+    public LatLng getGateLatLng() {
+        return gateLatLng;
+    }
+
     public int getGateID() {
         return gateID;
     }
