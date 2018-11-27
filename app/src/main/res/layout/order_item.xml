@@ -2,81 +2,91 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="180dp">
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/head"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:background="@drawable/icon_driver"
-        android:layout_margin="20dp"/>
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"/>
     <RelativeLayout
-        android:background="#808080"
-        android:layout_marginTop="60dp"
-        android:layout_width="match_parent"
-        android:layout_height="5dp"></RelativeLayout>
+        android:background="#00BFFF"
+        android:layout_marginTop="50dp"
+        android:layout_width="200dp"
+        android:layout_centerHorizontal="true"
+        android:layout_height="1dp"></RelativeLayout>
     <TextView
         android:id="@+id/order_item_count"
         android:text="订单1"
         android:gravity="center"
+        android:textStyle="bold"
         android:layout_width="80dp"
         android:layout_height="40dp"
         android:layout_marginLeft="70dp"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="10dp"/>
     <Button
         android:id="@+id/order_item_get"
         android:layout_width="80dp"
         android:layout_height="40dp"
         android:text="接单"
+        android:textStyle="bold"
         android:layout_marginRight="20dp"
         android:layout_alignParentRight="true"
-        android:layout_marginTop="20dp" />
+        android:layout_marginTop="10dp" />
     <TextView
         android:text="起点"
+        android:textStyle="bold"
         android:gravity="center"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="50dp"
         android:layout_marginLeft="20dp"/>
     <TextView
         android:id="@+id/order_item_start"
         android:gravity="center"
         android:text="湖南科技大学学生七区"
+        android:textStyle="bold"
         android:layout_width="200dp"
         android:layout_height="40dp"
         android:layout_alignParentRight="true"
         android:layout_marginRight="70dp"
-        android:layout_marginTop="70dp"/>
+        android:layout_marginTop="50dp"/>
     <RelativeLayout
-        android:background="#808080"
-        android:layout_marginTop="110dp"
-        android:layout_width="match_parent"
-        android:layout_height="5dp"></RelativeLayout>
+        android:background="#00BFFF"
+        android:layout_marginTop="90dp"
+        android:layout_width="200dp"
+        android:layout_centerHorizontal="true"
+        android:layout_height="1dp"></RelativeLayout>
 
     <TextView
         android:gravity="center"
         android:text="终点"
+        android:textStyle="bold"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginTop="120dp"
+        android:layout_marginTop="90dp"
         android:layout_marginLeft="20dp"/>
 
     <TextView
         android:id="@+id/order_item_end"
         android:gravity="center"
+        android:textStyle="bold"
         android:text="湖南科技大学学生七区"
         android:layout_width="200dp"
         android:layout_height="40dp"
         android:layout_alignParentRight="true"
         android:layout_marginRight="70dp"
-        android:layout_marginTop="120dp"/>
+        android:layout_marginTop="90dp"/>
     <RelativeLayout
-        android:background="#808080"
-        android:layout_marginTop="170dp"
-        android:layout_width="match_parent"
-        android:layout_height="5dp"></RelativeLayout>
+        android:background="#00BFFF"
+        android:layout_marginTop="130dp"
+        android:layout_width="200dp"
+        android:layout_centerHorizontal="true"
+        android:layout_height="1dp"></RelativeLayout>
     <TextView
         android:background="@drawable/icon_time"
-        android:layout_marginTop="180dp"
+        android:layout_marginTop="130dp"
         android:layout_marginLeft="20dp"
         android:layout_width="40dp"
         android:layout_height="40dp" />
@@ -85,33 +95,37 @@
         android:id="@+id/order_item_time"
         android:gravity="center"
         android:text="湖南科技大学学生七区"
+        android:textStyle="bold"
         android:layout_width="100dp"
         android:layout_height="40dp"
         android:layout_alignParentRight="true"
         android:layout_marginRight="170dp"
-        android:layout_marginTop="180dp"/>
+        android:layout_marginTop="130dp"/>
     <TextView
         android:gravity="center"
         android:text="人数"
+        android:textStyle="bold"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_alignParentRight="true"
-        android:layout_marginTop="180dp"
+        android:layout_marginTop="130dp"
         android:layout_marginRight="90dp"/>
 
     <TextView
         android:id="@+id/order_item_man_num"
         android:gravity="center"
         android:text="人数"
+        android:textStyle="bold"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_alignParentRight="true"
-        android:layout_marginTop="180dp"
+        android:layout_marginTop="130dp"
         android:layout_marginRight="20dp"/>
     <RelativeLayout
         android:background="#808080"
-        android:layout_marginTop="230dp"
-        android:layout_width="match_parent"
-        android:layout_height="5dp"></RelativeLayout>
+        android:layout_marginTop="170dp"
+        android:layout_width="300dp"
+        android:layout_centerHorizontal="true"
+        android:layout_height="3dp"></RelativeLayout>
 
 </RelativeLayout>

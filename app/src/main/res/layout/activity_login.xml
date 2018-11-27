@@ -98,7 +98,7 @@
                 android:gravity="center"
                 android:layout_centerHorizontal="true"
                 android:padding="20dp"
-                android:text="校园拼车GO"
+                android:text="校内拼车go"
                 android:textSize="23sp"
                 android:textStyle="italic"/>
 

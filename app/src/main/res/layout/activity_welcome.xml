@@ -10,7 +10,7 @@
         android:id="@+id/welcome_text"
         android:layout_width="300dp"
         android:layout_height="100dp"
-        android:text="校园拼车GO"
+        android:text="校内拼车go"
         android:textSize="40sp"
         android:gravity="center_horizontal"
         android:textStyle="italic"

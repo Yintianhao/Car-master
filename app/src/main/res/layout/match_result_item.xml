@@ -2,7 +2,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="290dp">
+    android:layout_height="250dp">
     <!--userName = (TextView)view.findViewById(R.id.match_userName);
         phoneNum = (TextView)view.findViewById(R.id.match_userPhone);
         startToEnd = (TextView)view.findViewById(R.id.match_startToEnd);
@@ -18,36 +18,48 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:background="@drawable/icon_driver"
-        android:layout_margin="20dp"/>
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"/>
     <TextView
         android:id="@+id/match_userName"
         android:text="名字"
         android:gravity="center"
+        android:textStyle="bold"
         android:layout_width="80dp"
         android:layout_height="40dp"
         android:layout_marginLeft="70dp"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="10dp"/>
 
     <TextView
         android:gravity="center"
         android:id="@+id/match_userPhone"
         android:layout_width="100dp"
         android:layout_height="40dp"
+        android:textStyle="bold"
         android:text="13657433916"
-        android:layout_marginRight="20dp"
+        android:layout_marginRight="60dp"
         android:layout_alignParentRight="true"
-        android:layout_marginTop="20dp" />
+        android:layout_marginTop="10dp" />
+    <CheckBox
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginRight="10dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="10dp"/>
     <RelativeLayout
-        android:background="#808080"
-        android:layout_marginTop="60dp"
-        android:layout_width="match_parent"
-        android:layout_height="5dp"></RelativeLayout>
+        android:layout_marginTop="50dp"
+        android:layout_width="200dp"
+        android:layout_height="1dp"
+        android:background="#00BFFF"
+        android:layout_centerHorizontal="true"></RelativeLayout>
+
     <TextView
         android:text="起点"
+        android:textStyle="bold"
         android:gravity="center"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="50dp"
         android:layout_marginLeft="20dp"/>
     <TextView
         android:id="@+id/match_start_place"
@@ -56,18 +68,20 @@
         android:layout_height="40dp"
         android:layout_alignParentRight="true"
         android:layout_marginRight="70dp"
-        android:layout_marginTop="70dp"/>
+        android:layout_marginTop="50dp"/>
     <RelativeLayout
-        android:background="#808080"
-        android:layout_marginTop="110dp"
-        android:layout_width="match_parent"
-        android:layout_height="5dp"></RelativeLayout>
+        android:background="#00BFFF"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="90dp"
+        android:layout_width="200dp"
+        android:layout_height="1dp"></RelativeLayout>
     <TextView
         android:gravity="center"
         android:text="终点"
+        android:textStyle="bold"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginTop="120dp"
+        android:layout_marginTop="100dp"
         android:layout_marginLeft="20dp"/>
 
     <TextView
@@ -77,15 +91,16 @@
         android:layout_height="40dp"
         android:layout_alignParentRight="true"
         android:layout_marginRight="70dp"
-        android:layout_marginTop="120dp"/>
+        android:layout_marginTop="100dp"/>
     <RelativeLayout
-        android:background="#808080"
-        android:layout_marginTop="160dp"
-        android:layout_width="match_parent"
-        android:layout_height="5dp"></RelativeLayout>
+        android:background="#00BFFF"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="140dp"
+        android:layout_width="200dp"
+        android:layout_height="1dp"></RelativeLayout>
     <TextView
         android:background="@drawable/icon_time"
-        android:layout_marginTop="180dp"
+        android:layout_marginTop="150dp"
         android:layout_marginLeft="20dp"
         android:layout_width="40dp"
         android:layout_height="40dp" />
@@ -97,18 +112,19 @@
         android:layout_height="40dp"
         android:layout_alignParentRight="true"
         android:layout_marginRight="70dp"
-        android:layout_marginTop="180dp"/>
+        android:layout_marginTop="150dp"/>
     <RelativeLayout
-        android:background="#808080"
-        android:layout_marginTop="220dp"
-        android:layout_width="match_parent"
-        android:layout_height="5dp"></RelativeLayout>
+        android:background="#00BFFF"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="190dp"
+        android:layout_width="200dp"
+        android:layout_height="1dp"></RelativeLayout>
     <TextView
         android:gravity="center"
         android:background="@drawable/ic_start"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginTop="240dp"
+        android:layout_marginTop="200dp"
         android:layout_marginLeft="20dp"/>
 
     <TextView
@@ -118,11 +134,12 @@
         android:layout_height="40dp"
         android:layout_alignParentRight="true"
         android:layout_marginRight="70dp"
-        android:layout_marginTop="240dp"/>
+        android:layout_marginTop="200dp"/>
     <RelativeLayout
         android:background="#808080"
-        android:layout_marginTop="280dp"
-        android:layout_width="match_parent"
-        android:layout_height="5dp"></RelativeLayout>
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="240dp"
+        android:layout_width="300dp"
+        android:layout_height="3dp"></RelativeLayout>
 
 </RelativeLayout>

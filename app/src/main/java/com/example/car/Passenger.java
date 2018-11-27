@@ -194,7 +194,6 @@ public class Passenger extends AppCompatActivity {
         initActivityEvents();
         initLocation();
         isAndroidSix();
-        initDialogEvents();
         addListener();//添加监听器
         MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(new LatLng(27.899096,112.923213));
         baiduMap.animateMapStatus(update);
@@ -365,6 +364,7 @@ public class Passenger extends AppCompatActivity {
         /*
         * 得到起点终点,起点经纬度,终点经纬度,后台请求
         * */
+        initDialogEvents();
         AlertDialog setTheOrder = new AlertDialog.Builder(Passenger.this)
                 .setView(parent)
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -402,7 +402,9 @@ public class Passenger extends AppCompatActivity {
                         parent.removeAllViews();
                     }
                 }).create();
+        setTheOrder.setCanceledOnTouchOutside(false);
         setTheOrder.show();
+
     }
     /*
     * 是否能提供车
@@ -453,8 +455,6 @@ public class Passenger extends AppCompatActivity {
     * @param accountNumber 手机号即账号
     * */
     public void addRequest(final String accountNumber){
-
-
         //请求地址
         String url = "http://47.106.72.170:8080/MyCarSharing/orderRequest2.action?userid=15211373105&startplacex=112.928886&startplacey=27.904449&destinationx=112.919487" +
                 "&destinationy=27.881441&startdate=2018-9-2-9-00-00&enddate=2018-9-2-9-30-00";
@@ -472,6 +472,13 @@ public class Passenger extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         try {
+                            LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+                            final LinearLayout parent = (LinearLayout) inflater.inflate(R.layout.activity_match_show, null);
+                            RecyclerView recyclerView = (RecyclerView)parent.findViewById(R.id.match_record);
+                            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(Passenger.this);
+                            recyclerView.setLayoutManager(layoutManager);
+                            MatchAdapter matchAdapter = new MatchAdapter(records);
+                            recyclerView.setAdapter(matchAdapter);
                             JSONArray jsonArray = new JSONObject(response).getJSONArray("result");
                             if(jsonArray.length()!=0){
                                 Log.d("Json Array length",jsonArray.length()+"");
@@ -479,16 +486,22 @@ public class Passenger extends AppCompatActivity {
                                     records.add(new MatchRecord(jsonArray.getJSONObject(i)));
                                 }
                                 if(records.size()!=0) {
-                                    LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-                                    LinearLayout parent = (LinearLayout) inflater.inflate(R.layout.activity_match_show, null);
-                                    RecyclerView recyclerView = (RecyclerView)parent.findViewById(R.id.match_record);
-                                    RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(Passenger.this);
-                                    recyclerView.setLayoutManager(layoutManager);
-                                    MatchAdapter matchAdapter = new MatchAdapter(records);
-                                    recyclerView.setAdapter(matchAdapter);
                                     AlertDialog alertDialog = new AlertDialog.Builder(Passenger.this)
                                             .setView(parent)
+                                            .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    parent.removeAllViews();
+                                                }
+                                            })
+                                            .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    parent.removeAllViews();
+                                                }
+                                            })
                                             .create();
+                                    alertDialog.setCanceledOnTouchOutside(false);
                                     alertDialog.show();
                                     WindowManager.LayoutParams layoutParams = alertDialog.getWindow().getAttributes();
                                     layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
